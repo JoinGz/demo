@@ -63,6 +63,47 @@
     // }
 
     // obj.each()
-
+    class obj {
+      constructor() {
+        this.arr = []
+      }
+      add(fn) {
+        this.arr.push(fn)
+      }
+      run() {
+        for (let index = 0; index < this.arr.length; index++) {
+          const element = this.arr[index]
+          element.fn()
+        }
+      }
+    }
+    class obj2 {
+      constructor() {
+        this.arr = []
+      }
+      add(fn) {
+        this.arr.push(fn)
+      }
+      run() {
+        for (let index = 0; index < this.arr.length; index++) {
+          const element = this.arr[index]
+          element.fn()
+        }
+      }
+    }
+    var x1 = new obj()
+    x1.add({
+      fn: function() {
+        console.log(1)
+      }
+    })
+    var x2 = new obj2()
+    x2.add({
+      fn: function() {
+        console.log(2)
+      }
+    })
+    x1.add(x2)
+    x1.run()
   </script>
 </html>
