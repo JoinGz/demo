@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    function Person({ name }) {
+      this.name = name
+    }
+    Person.prototype.sayName = function() {
+      console.log(`my name is ${this.name}`)
+    }
+    // var me = new Person({name:'gz'})
+    // console.log(me);
+    function Dog(name) {
+      console.log('你想看的this');
+      console.log(this.__proto__ === Dog.prototype);
+      console.log(this);
+      Person.call(this, name)
+      this.sex = 'dog'
+    }
+    var Fn = function() {}
+    Fn.prototype = Person.prototype
+    var newFn = new Fn()
+    // new Person 返回的对象
+    // Dog.prototype = new Person({name:'xx'})
+    // Dog.prototype.__proto__ = Person.prototype
+    // 只要原型上的东西
+    Dog.prototype = new Fn()
+    Dog.prototype.sayWW = function() {
+      console.log('ww')
+    }
+    let y = new Dog({ name: 'dog3' })
+    console.log('y',y);
+    
+    console.log(new Dog({ name: 'dog' }))
+    new Dog({ name: 'dog998' }).sayWW()
+  </script>
+</html>

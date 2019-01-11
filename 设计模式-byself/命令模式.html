@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="text" id="input" /> <button id="backout">撤销</button>
+    <button id="reload">重播</button>
+  </body>
+  <script>
+    let input = document.querySelector('#input')
+    let backout = document.querySelector('#backout')
+    let reload = document.querySelector('#reload')
+    let proxyCache = () => {
+      var cache = []
+      var push = obj => {
+        cache.push(obj)
+      }
+      return {
+        push,
+        cache
+      }
+    }
+    let inputCache = proxyCache()
+    input.oninput = obj => {
+      inputCache.push(input.value)
+    }
+    backout.onclick = () => {
+      inputCache.cache.pop()
+      if (!inputCache.cache[inputCache.cache.length - 1]) {
+        input.value = ''
+        return
+      }
+      input.value = inputCache.cache[inputCache.cache.length - 1]
+    }
+    reload.onclick = () => {
+      var a = inputCache.cache.length
+      var b = 0
+      var c = ''
+      var id = setInterval(() => {
+        c = inputCache.cache[b]
+        input.value = c
+        b++
+        if (b > a - 1) {
+          clearInterval(id)
+        }
+      }, 150)
+    }
+  </script>
+</html>

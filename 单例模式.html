@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+
+</body>
+<script>
+  let single = (fn)=> {
+    let result = null
+    return function(){
+      if(!result){
+        result = fn.apply(this, arguments)
+      }
+    }
+  }
+  let x = single(function () {
+    console.log(1);
+    return 1
+  })
+  x()
+  x()
+  x()
+  let x1 = single(function () {
+    console.log(11);
+    return 11
+  })
+  x1()
+  x1()
+  x1()
+</script>
+</html>

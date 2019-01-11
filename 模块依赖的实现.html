@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    var MyModules = (function Manager() {
+      var modules = {}
+      function define(name, deps, impl) {
+        for (var i = 0; i < deps.length; i++) {
+          // 传入的依赖的参数名，就等于之前加入的函数
+          deps[i] = modules[deps[i]]
+        }
+        // 加入函数
+        modules[name] = impl.apply(impl, deps)
+        console.log('modules[name]',modules[name]);
+        
+      }
+      function get(name) {
+        return modules[name]
+      }
+      return {
+        define: define,
+        get: get
+      }
+    })()
+    // 定义一个bar
+    MyModules.define('bar', [], function() {
+      function hello(who) {
+        return 'Let me introduce: ' + who
+      }
+      return {
+        hello: hello
+      }
+    })
+    MyModules.define('foo', ['bar'], function(bar) {
+      console.log('bar', bar);
+      
+      var hungry = 'hippo'
+      function awesome() {
+        console.log(bar.hello(hungry).toUpperCase())
+      }
+      return {
+        awesome: awesome
+      }
+    })
+    MyModules.define('log1', [], function() {
+      function log1() {
+        console.log(1)
+      }
+      return {
+        log1
+      }
+    })
+    MyModules.define('log2', ['log1','bar'], function(bar,bar2) {
+      function awesome() {
+        bar.log1()
+        console.log(bar2.hello('666'))
+        console.log(2);
+      }
+      return {
+        log2: awesome
+      }
+    })
+    var bar = MyModules.get('bar')
+    var foo = MyModules.get('foo')
+    console.log(bar.hello('hippo')) // Let me introduce: hippo
+    foo.awesome() // LET ME INTRODUCE: HIPPO
+    var log1 = MyModules.get('log1')
+    var log2 = MyModules.get('log2')
+    log2.log2()
+
+  </script>
+</html>

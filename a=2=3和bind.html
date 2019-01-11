@@ -1,0 +1,114 @@
+<script>
+  // a = [1, 2, 3]
+  // a.join = a.shift
+  // console.log(a == 1 && a == 2 && a == 3)
+
+  if (!Function.prototype.bindbind) {
+    Function.prototype.bindbind = function(oThis) {
+      console.log('重新开始程序')
+      console.log('oThis', oThis)
+      if (typeof this !== 'function') {
+        // 与 ECMAScript 5 最接近的
+        // 内部 IsCallable 函数
+        throw new TypeError(
+          'Function.prototype.bindbind - what is trying ' +
+            'to be bound is not callable'
+        )
+      }
+      var aArgs = Array.prototype.slice.call(arguments, 1),
+        fToBind = this,
+        fNOP = function() {},
+        fBound = function() {
+          return fToBind.apply(
+            this instanceof fNOP && oThis ? this : oThis,
+            aArgs.concat(Array.prototype.slice.call(arguments))
+          )
+        }
+      console.log('this', this)
+      fNOP.prototype = this.prototype
+      fBound.prototype = new fNOP()
+      return fBound
+    }
+  }
+  var obj = { a: 1 }
+  function a1() {
+    console.log('this.a : ' + this.a)
+    // console.log('arguments',arguments);
+    // return this.a
+  }
+  // a1.prototype.a = 500
+  var a2 = a1.bindbind(obj, { a: 1 }, 3, 6)
+  // a2()
+  new a2()
+  a1.bindbind(new a2(), 123)
+  // console.log('----------------');
+  var a3 = a1.bind(obj, { a: 1 }, 3, 6)
+  console.log(a3())
+
+  a1.bind(new a3(), 123)
+</script>
+<script>
+  if (!Function.prototype.myBind) {
+    Function.prototype.myBind = function(oThis) {
+      if (typeof this !== 'function') {
+        throw new Error('must be function')
+      }
+      let arr = [].slice.call(arguments, 1)
+      var that = this
+      var fn = function() {}
+      var FN = function() {
+        return that.apply(this instanceof FN && oThis ? this : oThis, arr)
+      }
+      fn.prototype = this.prototype
+      FN.prototype = new fn()
+      // return function() {
+      // 这里的this就建立到function() {}上面了
+      //   return that.apply(this instanceof FN && oThis ? this : oThis, arr)
+      // }
+      return FN
+    }
+  }
+  var m = { m: 'm' }
+  function logm() {
+    console.log(this.m)
+    console.log(arguments)
+  }
+  logm.prototype.m = ',mmmm'
+  var log = logm.myBind(m, { a: 1 }, 5, 6, 9)
+  log()
+  logm.myBind(new log(), 555)
+  // console.log(logm.myBind(new log()))
+  var foo = {
+    something: function() {
+      console.log('Tell me something good...')
+    }
+  }
+  var bar = Object.create(foo)
+  console.log(bar)
+  function Car() {
+    this.color = 'red'
+  }
+  Car.prototype.sayHi = function() {
+    console.log('你好')
+  }
+  for (let key in Car) {
+    console.log(key)
+  }
+  console.log(Object.getOwnPropertyNames(Car))
+
+  var car2 = Object.create(Car)
+  console.log(car2.color) //undefined
+  // console.log(car2.sayHi()) //undefined
+
+  const prototype1 = {}
+  const object1 = Object.create(prototype1)
+  console.log(object1)
+  console.log(Object.getPrototypeOf(object1));
+  console.log(Object.getPrototypeOf(object1) === prototype1);
+  function Fn(){
+         }
+var fn = new Fn();
+//通过getPrototypeOf静态方法，获得对象fn的prototype
+var proto = Object.getPrototypeOf(fn);
+console.log(proto === Fn)
+</script>

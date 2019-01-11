@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  let Foo = {
+    me (who) {
+      this.me = who
+    },
+    identify () {
+      console.log(`I'm ${this.me}`)
+    }
+  }
+  let Bar = Object.create(Foo)
+  Bar.speak = function () {
+    console.log(`i'm ${this.me}`);
+  }
+  let bar = Object.create(Bar)
+  bar.me('GZ')
+  bar.speak()
+  console.log(bar);
+  function Foo2(who) {
+    this.me = who
+    this.identify = function () {
+      console.log(`I'm ${this.me}`)      
+    }
+  }
+  function Bar2(who) {
+    Foo2.call(this, who)
+  }
+  Bar2.prototype = Object.create(Foo2.prototype)
+  Bar2.prototype.speak = function () {
+    console.log(`i'm ${this.me}`);
+  }
+  let bar2n = new Bar2('Gz')
+  bar2n.speak()
+  console.log(bar2n)
+</script>
+</html>

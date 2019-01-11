@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    123
+  </body>
+  <script>
+    console.log('es5')
+  </script>
+  <script type="module">
+    console.log('es6')
+    // 要在服务器环境下搞
+    import { a, add, logA, obj, changeA } from './a.js'
+    console.log(a)
+    console.log(add())
+    // a = 10 不能直接修改
+    changeA(10) // 能通过导出的函数修改，全局变化
+    console.log(obj);
+    obj.a = 2 // 不能直接改对象，可以修改上面的属性。全局变化
+    console.log(obj);
+  </script>
+</html>

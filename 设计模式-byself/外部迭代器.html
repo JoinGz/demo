@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>外部迭代器</title>
+  </head>
+  <body></body>
+  <script>
+    var each = obj => {
+      var num = 0
+      var next = () => {
+        return obj[num++]
+      }
+      var isDone = () => {
+        return num >= obj.length
+      }
+      var currentObj = () => {
+        return obj[num]
+      }
+      return {
+        next,
+        isDone,
+        currentObj
+      }
+    }
+    var test = each([1, 2, 3, 4, 5, 6])
+    var test2 = each([1, 2])
+    var checkSame = (obj1, obj2) => {
+      while (!obj1.isDone() && !obj2.isDone()) {
+        if (obj1.currentObj() !== obj2.currentObj()) {
+          console.log('不相等')
+          return false
+        }
+        obj1.next()
+        obj2.next()
+        if (
+          (obj1.isDone() && !obj2.isDone()) ||
+          (!obj1.isDone() && obj2.isDone())
+        ) {
+          console.log('不相等')
+          return false
+        }
+      }
+      console.log('相等')
+    }
+    console.log(checkSame(test, test2))
+  </script>
+</html>
