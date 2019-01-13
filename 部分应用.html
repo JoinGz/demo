@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  function foo(p1, p2) {
+    this.val = p1 + p2;
+  }
+  /*  
+   * bind(..) 的功能之一就是可以把除了第一个参数（第一个参数用于绑定 this ）之外的其他参数都传给下层的函数
+   *（这种技术称为“部分应用”，是“柯里化”的一种）。
+  */
+  // 之所以使用 null 是因为在本例中我们并不关心硬绑定的 this 是什么
+  // 反正使用 new 时 this 会被修改
+  var bar = foo.bind(null, "p1",'s');
+  var baz = new bar("p2");
+  var bax = new bar('x','y')
+  console.log(baz.val);
+</script>
+
+</html>

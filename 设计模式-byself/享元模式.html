@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  let factory = (function () {
+    var cache = {}
+    return {
+      add (id, sex){
+        cache[id] = sex
+        return me
+      },
+      setSex (id, obj) {
+        let data = cache[id]
+        obj['sex'] = data
+      }
+    }
+  }())
+  class Me {
+    constructor (name, id) {
+      this.name = name
+      this.id = id
+      this.init()
+    }
+    init (x) {
+      factory.setSex(x , this)
+    }
+  }
+  let me = new Me('Gz',1)
+  let x = factory.add(1,'girl')
+  console.log(x);
+  me.init(1)
+  console.log(x);
+  let x1 = factory.add(11,'girl2')
+  x1.init(11)
+
+  console.log(x1);
+
+  // console.log(me);
+</script>
+</html>

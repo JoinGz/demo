@@ -73,7 +73,7 @@
       run() {
         for (let index = 0; index < this.arr.length; index++) {
           const element = this.arr[index]
-          element.fn()
+          element.run()
         }
       }
     }
@@ -87,20 +87,25 @@
       run() {
         for (let index = 0; index < this.arr.length; index++) {
           const element = this.arr[index]
-          element.fn()
+          element.run()
         }
       }
     }
     var x1 = new obj()
     x1.add({
-      fn: function() {
+      run: function() {
         console.log(1)
       }
     })
     var x2 = new obj2()
     x2.add({
-      fn: function() {
+      run: function() {
         console.log(2)
+      }
+    })
+    x2.add({
+      run: function() {
+        console.log(3)
       }
     })
     x1.add(x2)
