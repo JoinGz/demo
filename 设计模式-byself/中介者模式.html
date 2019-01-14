@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  class player {
+    constructor (name, team) {
+      this.name = name
+      this.team = team
+      this.join()
+    }
+    join () {
+      manage.join(this)
+    }
+    death () {
+      console.log(`${this.name}，挂了`);
+      manage.death(this)
+    }
+  }
+  let manage = (function () {
+    let players = {}
+    let join =  function (that) {
+      players[that.team] = players[that.team] || []
+      players[that.team].push(that)
+      console.log(`${that.name} had joined ${that.team} team!`);
+    }
+    let death = function (that) {
+      let team = players[that.team]
+      for (let index = 0; index < team.length; index++) {
+        const element = team[index];
+        if(element === that){
+          team.splice(index, 1)
+        }
+      }
+    }
+    return {
+      join,
+      players,
+      death
+    }
+  }())
+  let player1 = new player('帅锅', 'yellow')
+  let player2 = new player('镁铝', 'blue')
+  let player3 = new player('靓仔', 'yellow')
+  console.log(manage.players)
+  player3.death()  
+</script>
+</html>

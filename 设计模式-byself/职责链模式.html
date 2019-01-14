@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    // 书上版本 -- start
+    // var Chain = function(fn) {
+    //   this.fn = fn
+    //   this.successor = null
+    // }
+    // Chain.prototype.setNextSuccessor = function(successor) {
+    //   return (this.successor = successor)
+    // }
+    // Chain.prototype.passRequest = function() {
+    //   var ret = this.fn.apply(this, arguments)
+    //   if (ret === 'nextSuccessor') {
+    //     return (
+    //       this.successor &&
+    //       this.successor.passRequest.apply(this.successor, arguments)
+    //     )
+    //   }
+    //   return ret
+    // }
+    // 书上版本 -- end
+    class manager {
+      constructor(now) {
+        this.now = now
+        this.next = null
+      }
+      run() {
+        let result = this.now.apply(this, arguments)
+        if (result === 'next') {
+          this.next && this.next.run.apply(this.next, arguments)
+        }
+      }
+      setNext(next) {
+        this.next = next
+      }
+    }
+    let m1 = new manager(function(a) {
+      if (a > 100) {
+        console.log('1')
+        return 'next'
+      } else {
+        console.log('小于100;stop')
+      }
+    })
+    let m2 = new manager(function(a) {
+      if (a > 200) {
+        console.log('2')
+        return 'next'
+      } else {
+        console.log('大于100小于200;stop')
+      }
+    })
+    let m3 = new manager(function(a) {
+      if (a > 300) {
+        console.log('3')
+        return 'next'
+      } else {
+        console.log('大于200小于300;stop')
+      }
+    })
+    m1.setNext(m2)
+    m2.setNext(m3)
+    // let test = new control(m1)
+    m1.run(301)
+  </script>
+</html>

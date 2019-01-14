@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  class plane {
+    constructor () {
+      
+    }
+    shoot () {
+      console.log('普通子弹')
+    }
+  }
+  class superPlane {
+    constructor () {
+
+    }
+    shoot () {
+      console.log('炒鸡子弹')
+    }
+  }
+  class EXPlane {
+    constructor () {
+
+    }
+    shoot () {
+      console.log('终极子弹')
+    }
+  }
+  let player = new plane()
+  player = new superPlane()
+  player = new EXPlane()
+  player.shoot()
+  // before
+  let before = function (fn, next) {
+    return function () {
+      fn.apply(this, arguments)
+      next.apply(this, arguments)
+    }
+  }
+  let x = before(function (a,c) {
+    console.log(a);
+    a.num = 1
+    c = '888'
+    console.log(c);
+  },
+  function (a,c) {
+    console.log(a);
+    console.log(c);
+  })
+  let a = { num: 500 } // 还是修改对象
+  let c = '123'
+  x(a, c)
+</script>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button type="button" id="btn">灯</button>
+    <button type="button" id="btn2">灯-全对象</button>
+  </body>
+  <script>
+    let btn = document.querySelector('#btn')
+    let btn2 = document.querySelector('#btn2')
+
+    class lamp {
+      constructor() {
+        this.status = null
+        this.init()
+      }
+      init() {
+        this.status = FSM.close
+      }
+      toggle() {
+        this.status.action.call(this) // 保持原来的this
+      }
+    }
+    FSM = {
+      low: {
+        action() {
+          console.log('弱光')
+          this.status = FSM.strong
+        }
+      },
+      strong: {
+        action() {
+          console.log('强光')
+          this.status = FSM.close
+        }
+      },
+      close: {
+        action() {
+          console.log('关灯')
+          this.status = FSM.low
+        }
+      }
+    }
+    let lamp1 = new lamp()
+    btn.onclick = function() {
+      lamp1.toggle()
+      // return false
+    }
+    // 全对象版本
+    class OffState {
+      constructor(obj) {
+        this.obj = obj
+      }
+      toggle() {
+        console.log('关灯')
+        this.obj.status = this.obj.lowState
+      }
+    }
+    class LowState {
+      constructor(obj) {
+        this.obj = obj
+      }
+      toggle() {
+        console.log('弱光')
+        this.obj.status = this.obj.superState
+      }
+    }
+    class SuperState {
+      constructor(obj) {
+        this.obj = obj
+      }
+      toggle() {
+        console.log('强光')
+        this.obj.status = this.obj.offState
+      }
+    }
+    class Light {
+      constructor() {
+        this.offState = new OffState(this)
+        this.lowState = new LowState(this)
+        this.superState = new SuperState(this)
+        this.status = null
+        this.init()
+      }
+      init() {
+        this.status = this.offState
+      }
+      action() {
+        this.status.toggle()
+      }
+    }
+    
+    let lamp2 = new Light()
+    btn2.onclick = function() {
+      lamp2.action()
+      // return false
+    }
+  </script>
+</html>
