@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      div {
+        width: 200px;
+        height: 200px;
+        background: #ccc;
+      }
+      span {
+        width: 50px;
+        height: 50px;
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div><span>55555</span></div>
+  </body>
+  <script>
+    let div = document.querySelector('div')
+    let span = document.querySelector('span')
+    // span.addEventListener('click',function () {
+    //   console.log('span')
+    // })
+    // div.addEventListener('click',function () {
+    //   console.log('div')
+    // })
+    document.body.addEventListener('click', function() {
+      console.log('body')
+    })
+    div.onclick = function() {
+      console.log('div')
+    }
+    span.onclick = function() {
+      console.log('span')
+    }
+    Function.prototype.myBind = function() {
+      var self = this
+      let otherArg = Array.prototype.slice.call(arguments, 1)
+      let one = Array.prototype.slice.call(arguments, 0, 1)[0]
+      let f = function() {}
+      f.prototype = this.prototype
+      let bound = function() {
+        otherArg = otherArg.concat(Array.prototype.slice.call(arguments))
+        self.apply(this instanceof f ? this : one, otherArg)
+      }
+      bound.prototype = new f()
+      return bound
+    }
+    let a = 100
+    let fn = function(a, c) {
+      console.log(this.a + a + c)
+      // console.log(this);
+      // console.log(a);
+    }
+    let obj = { a: 1 }
+    let y = fn.myBind(obj, a)
+    let c = 2
+    y(c)
+    function isObj(obj) {
+      return (
+        Object.prototype.toString.call(obj) === '[object Object]' && obj != null
+      )
+    }
+    function deepClone(object) {
+      var obj = isObj(object) ? {} : []
+      for (const key in object) {
+        if (object.hasOwnProperty(key)) {
+          const element = object[key]
+          if (typeof element === 'object') {
+             obj[key] = deepClone(element)
+          } else {
+            obj[key] = element
+          }
+        }
+      }
+      return obj
+    }
+    let ooj = {
+      a: 4,
+      b: 100,
+      c: {
+        d: 100
+      },
+      e: [1, 2, 3]
+    }
+    let l = deepClone(ooj)
+    l.c.d = 666
+    l.e[2] = 4
+    console.log(ooj)
+    console.log(l)
+  </script>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    var a = {
+      a: 666
+    }
+    var obj = {
+      arr: [1, 2, 3],
+      a: { a: 1 },
+      name: 'deepCopy',
+      gz: null,
+      age: undefined,
+      obj: a
+    }
+    function deepCopy(obj) {
+      let result
+      result = Array.isArray(obj) ? [] : {}
+      for (let key in obj) {
+        if (isObj(obj[key])) {
+          result[key] = deepCopy(obj[key])
+        } else {
+          result[key] = obj[key]
+        }
+      }
+      return result
+    }
+    function isObj(obj) {
+      return typeof obj === 'object' && obj != null
+    }
+    // var obj2 = deepCopy(obj)
+    // console.log(obj2);
+    // 解决对象引用自身问题(循环引用)
+    // a.b = a
+    function deepCopy2(obj, arr = []) {
+      let result
+      result = Array.isArray(obj) ? [] : {}
+      if (arr.includes(obj)) {
+        return obj
+      }
+      arr.push(obj)
+      for (let key in obj) {
+        if (isObj(obj[key])) {
+          result[key] = deepCopy2(obj[key], arr)
+        } else {
+          result[key] = obj[key]
+        }
+      }
+      return result
+    }
+    var obj3 = deepCopy2(obj)
+    console.log(obj3)
+    function cloneDeep5(x) {
+      const root = {}
+
+      // 栈
+      const loopList = [
+        {
+          parent: root,
+          key: undefined,
+          data: x
+        }
+      ]
+
+      while (loopList.length) {
+        // 深度优先
+        const node = loopList.pop()
+        const parent = node.parent
+        const key = node.key
+        const data = node.data
+
+        // 初始化赋值目标，key为undefined则拷贝到父元素，否则拷贝到子元素
+        let res = parent
+        if (typeof key !== 'undefined') {
+          res = parent[key] = Array.isArray(data) ? [] : {}
+        }
+
+        for (let k in data) {
+          if (data.hasOwnProperty(k)) {
+            if (typeof data[k] === 'object' && data[k]!= null) {
+              // 下一次循环
+              loopList.push({
+                parent: res,
+                key: k,
+                data: data[k]
+              })
+            } else {
+              res[k] = data[k]
+            }
+          }
+        }
+        // console.log(loopList);
+        // throw ''
+        
+      }
+
+      return root
+    }
+    var obj4 = cloneDeep5(obj)
+    console.log(obj4);
+    class me{
+      constructor
+    }
+  </script>
+</html>

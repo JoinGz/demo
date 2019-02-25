@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    let arr = {
+      '1,3,5,7,8,10,12': 31
+    }
+    let big = '1,3,5,7,8,10,12'
+    window.onload = () => {
+      let now = new Date().getHours()
+      console.log((now / 24).toFixed(2))
+      let Month = new Date().getMonth()
+      let day = new Date().getDate()
+      // console.log(Month, day)
+      let dayinYear = null
+      if (big.match(Month)) {
+        dayinYear = Month * 31 + day
+        // console.log(dayinYear)
+      }
+      let thisYear = new Date('2019-1-1 00:00:00')
+      let dayMillise = 1000 * 60 * 60 * 24
+      console.log((((new Date()).getTime() - thisYear.getTime())/dayMillise)/365)
+    }
+    let now = new Date()
+    let year = now.getFullYear()
+    let isLeapYear = (function (year) {
+      return (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))
+    })(year)
+    let fullYearDays = isLeapYear ? 366 : 365
+    let thisYear = (new Date(`${year}-1-1 00:00:00`)).getTime()
+    let dayMillise = 1000 * 60 * 60 * 24
+    let nowTime = new Date().getTime()
+    let percentageYear = String(((nowTime - thisYear)/dayMillise/fullYearDays)*100).slice(0,5)
+    console.log('今年已过：' + percentageYear+'%');
+    // 一天过了多久
+    let month = now.getMonth()
+    let date = now.getDate()
+    let thisDay = (new Date(`${year}-${month+1}-${date} 24:00:00`)).getTime()
+    let percentageDay =  1 - (thisDay - nowTime) / dayMillise
+    console.log(percentageDay);
+    
+  </script>
+</html>

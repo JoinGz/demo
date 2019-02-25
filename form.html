@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form id="form">
+      <select multiple="multiple" name="q[]" id="q">
+        <option value="RUNOOB">Runoob</option>
+        <option value="GOOGLE">Google</option>
+        <option value="TAOBAO">Taobao</option>
+      </select>
+      <input type="submit" value="提交" />
+    </form>
+  </body>
+  <script>
+    document.querySelector('#form').onchange = function() {
+      // 单选直接用select的value就行，多选要循环遍历；
+      // console.log(document.querySelector('#q').length);
+      // console.dir(document.querySelector('#q'))
+      for (let index = 0; index < document.querySelector('#q').length; index++) {
+        const element = document.querySelector('#q')[index];
+        if(element.selected){
+          console.log(element.value);
+        }
+      }
+    }
+  </script>
+</html>

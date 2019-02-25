@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      p + p {
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <p>我是一段文字啦，嘻嘻</p>
+    <p>我不是普通的文字，哈哈 css禁止选中</p>
+    <input type="text" />
+    <div>
+      点我
+      <br>
+      <br>
+      <br>
+      <br>
+    </div>
+  </body>
+  <script>
+    // // 主要是在复制的时候就会对文本内容进行限制了
+    // document.body.oncopy = e => {
+    //   e.preventDefault()
+    //   //  获取 复制/剪切 内容
+    //   console.log(window.getSelection(0).toString())
+    //   let text = window.getSelection(0).toString()
+    //   let clipboardData = e.clipboardData || window.clipboardData // 兼容处理
+    //   if (e.clipboardData) {
+    //     return e.clipboardData.setData('text', text + 'textFont') // 将信息写入粘贴板
+    //   } else {
+    //     // 兼容IE
+    //     return window.clipboardData.setData('text', text + 'textFont')
+    //   }
+    // }
+    // document.body.onpaste = e => {
+    //   let clipboardData = e.clipboardData || window.clipboardData // 兼容处理
+    //   console.log('要粘贴的数据', clipboardData.getData('text'))
+    // }
+  </script>
+  <script>
+    let div = document.querySelector('div')
+    // addEventListener的不会被覆盖
+    div.addEventListener('click',function () {
+      console.log(1);
+      
+    })
+    div.addEventListener('click',function () {
+      console.log(2)
+    })
+    // 会被覆盖
+    div.onclick = function (params) {
+      console.log(11);
+    }
+    div.onclick = function (params) {
+      console.log(222);
+    } // 1 2 222
+  </script>
+</html>
