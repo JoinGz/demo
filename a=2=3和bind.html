@@ -112,3 +112,35 @@ var fn = new Fn();
 var proto = Object.getPrototypeOf(fn);
 console.log(proto === Fn)
 </script>
+<script>
+  Function.prototype.bind2 = function () {
+    let that = this
+    let firstArg = Array.prototype.shift.apply(arguments)
+    let args = arguments
+    let fn = function () {}
+    fn.prototype = this.prototype
+    function B() {
+      // return that.apply(firstArg, ([]).concat.apply(args,([]).slice.call(arguments)))
+      return that.apply(this instanceof fn ? this : firstArg, ([]).concat.apply(args,([]).slice.call(arguments)))
+    }
+    B.prototype = new fn()
+    return B
+  }
+  let abc = {
+    a: 'bind2'
+  }
+  function logA() {
+    console.log(this.a);
+    this.a = 500
+  }
+  let y = logA.bind2(abc)
+  y()
+  //  new 的用法 ： 当是 var b = logA.bind2(new y())时用的
+  var bbb = logA.bind2(new y()) // new y() 就是logA
+  bbb()
+  // 原生
+  let y1 = logA.bind(abc)
+  y1()
+  var bbb1 = logA.bind(new y())
+  bbb1()
+</script>

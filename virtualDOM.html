@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  var element = {
+    tagName: 'ul',
+    props: {
+      id: 'ul'
+    },
+    children: [{
+        tagName: 'li',
+        props: {
+          id: 'li'
+        },
+        children: ["i'm content."]
+      },
+      {
+        tagName: 'li',
+        props: {
+          id: 'li'
+        },
+        children: ["i'm content."]
+      },
+      {
+        tagName: 'li',
+        props: {
+          id: 'li'
+        },
+        children: ["i'm content."]
+      }
+    ]
+  }
+  // element.js
+  class Element {
+    constructor(
+      tagName,
+      props,
+      children
+    ) {
+      this.tagName = tagName
+      this.props = props
+      this.children = children
+    }
+    render() {
+      let el = document.createElement(this.tagName)
+      for (let key in this.props) {
+        el.setAttribute(key, this.props[key])
+      }
+      this.children.forEach(element => {
+        let ele = (element instanceof Element) ? element.render() : document.createTextNode(element)
+        el.appendChild(ele)
+      });
+      return el
+    }
+  }
+
+  function el(tagName, props, children) {
+    return new Element(tagName, props, children)
+  }
+  let dom = el('ul', {
+    id: 'list'
+  }, [
+    el('li', {
+      class: 'item'
+    }, ['Item 1']),
+    el('li', {
+      class: 'item'
+    }, ['Item 2']),
+    el('li', {
+      class: 'item'
+    }, ['Item 3'])
+  ])
+  console.log(dom.render());
+</script>
+
+</html>
