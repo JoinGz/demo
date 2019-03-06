@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  class Animal {
+    constructor(name, age){
+      this.name = name
+      this.age = age
+      this.props = 'props'
+    }
+    static hello () {
+      console.log('hello')
+    }
+  }
+  class Cat extends Animal{
+    constructor (n) {
+      super(n)
+    }
+  }
+  let animal = new Animal('dog', 2)
+  let cat = new Cat('cat', 1)
+  console.log(animal)
+  console.log(cat)
+  function A(name,age) {
+    this.name = name
+    this.age = age
+  }
+  A.prototype.hello = function () {
+    console.log(55);
+  }
+  function B(name,age) {
+    A.call(this,name,age)
+  }
+  function toOtherPrototype(obj2) {
+    var fn = function () {
+    }
+    fn.prototype = obj2
+    return new fn()
+  }
+  B.prototype = toOtherPrototype(A.prototype)
+  B.prototype.x = 5
+  let b = new B('snake', 5)
+  console.log(b);
+  b.hello()
+  console.dir(B);
+  
+</script>
+</html>
