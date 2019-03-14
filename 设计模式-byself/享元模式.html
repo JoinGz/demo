@@ -27,7 +27,6 @@
     constructor (name, id) {
       this.name = name
       this.id = id
-      this.init()
     }
     init (x) {
       factory.setSex(x , this)
@@ -36,13 +35,46 @@
   let me = new Me('Gz',1)
   let x = factory.add(1,'girl')
   console.log(x);
-  me.init(1)
-  console.log(x);
+  me.init(1,me)
+  console.log(Object.assign({},me));
   let x1 = factory.add(11,'girl2')
-  x1.init(11)
+  x1.init(11,me)
 
-  console.log(x1);
+  // console.log(x1);
+  console.log(Object.assign({},me));
 
-  // console.log(me);
+  console.log(me);
+  class saveProperty {
+    constructor () {
+      this.property = {}
+    }
+    addProperty (id, property) {
+      this.property[id] = property
+    }
+    changeProperty (id, obj) {
+      for(let key in this.property[id]){
+        obj[key] = this.property[id][key]
+      }
+    }
+  }
+  class Animal {
+    constructor () {
+      this.name = 'dog'
+    }
+    getDogSex () {
+      return this.sex
+    }
+  }
+  let dog = new Animal()
+  let saveFactory = new saveProperty()
+  saveFactory.addProperty(1,{sex: 'famale', age: 2})
+  saveFactory.addProperty(2,{sex: 'male', age: 1})
+  saveFactory.changeProperty(1,dog)
+  console.log(dog.getDogSex());
+  saveFactory.changeProperty(2,dog)
+  console.log(dog.getDogSex());
+  
+  
+
 </script>
 </html>
