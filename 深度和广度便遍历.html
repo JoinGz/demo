@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id='root'>
+    <span>1
+      <a href="#">
+        1-1
+      </a>
+      <div>1-2<a>1-2-1<span>1-3-1</span></a></div>
+    </span>
+    <span>2
+      <p>2-1</p>
+    </span>
+  </div>
+</body>
+<script>
+  let root = document.querySelector('#root')
+  let deepTraversal3 = (node) => {
+    let stack = []
+    let nodes = []
+    if (node) {
+      // 推入当前处理的node
+      stack.push(node)
+      while (stack.length) {
+        let item = stack.pop()
+        let children = item.children
+        nodes.push(item)
+        // node = [] stack = [parent]
+        // node = [parent] stack = [child3,child2,child1]
+        // node = [parent, child1] stack = [child3,child2,child1-2,child1-1]
+        // node = [parent, child1-1] stack = [child3,child2,child1-2]
+        for (let i = children.length - 1; i >= 0; i--) {
+          stack.push(children[i])
+        }
+      }
+    }
+    return nodes
+  }
+  console.log(deepTraversal3(root));
+// 深度优先
+  function deep3(ele) {
+    let stack = []
+    let result = []
+    if (ele) {
+      stack.push(ele)
+      while (stack.length) {
+        // 先进后出
+        let item = stack.pop()
+        let children = item.children
+        result.push(item)
+        // debugger
+        for (let i = children.length - 1; i >= 0; i--) {
+          const element = children[i];
+          stack.push(element)
+        }
+      }
+
+    }
+    return result
+  }
+console.log(deep3(root));
+// 广度优先
+function deep4(ele) {
+    let stack = []
+    let result = []
+    if (ele) {
+      stack.push(ele)
+      while (stack.length) {
+        // 先进先出
+        let item = stack.shift()
+        let children = item.children
+        result.push(item)
+        // debugger
+        for (let i = 0; i <children.length; i++) {
+          const element = children[i];
+          stack.push(element)
+        }
+      }
+
+    }
+    return result
+  }
+
+  function deep(ele) {
+    let eleArr = ele.children
+    if (eleArr.length > 0) {
+      [].forEach.call(eleArr, v => {
+        console.log(v)
+        if (v.children.length > 0) {
+          deep(v)
+        }
+      })
+    }
+  }
+  deep(root)
+
+  function deep2(ele) {
+    let eleArr = ele.children
+    let son = []
+    if (eleArr.length > 0) {
+      [].forEach.call(eleArr, v => {
+        console.log(v)
+        if (v.children.length > 0) {
+          son.push(v)
+        }
+      })
+      son.forEach(v => {
+        deep2(v)
+      })
+    }
+  }
+  console.log('-----------------');
+  deep2(root)
+
+  function deepTraversal(node, nodeList) {
+    if (node) {
+      nodeList.push(node);
+      var children = node.children;
+      for (var i = 0; i < children.length; i++)
+        //每次递归的时候将  需要遍历的节点  和 节点所存储的数组传下去
+        deepTraversal(children[i], nodeList);
+    }
+    return nodeList;
+  }
+  console.log(deepTraversal(root, nodeList = []))
+  function name(fn, ...arg) {
+    let obj = Object.create(fn.prototype)
+    let result = fn.apply(obj,arg)
+    return result instanceof Object ? result : obj
+  }
+  function m1() {
+    this.a = 5
+    return {
+      a:500
+    }
+  }
+  console.log(name(m1));
+  function _new(fn, ...arg) {
+    const obj = Object.create(fn.prototype);
+    const ret = fn.apply(obj, arg);
+    return ret instanceof Object ? ret : obj;
+}
+console.log(_new(m1));
+
+  
+</script>
+
+</html>
