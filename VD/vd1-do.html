@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="box"></div>
+</body>
+<script>
+  let box = document.querySelector('.box')
+  render(box)
+
+  function render(aim) {
+    let vdom = view()
+    let ele = createEle(vdom)
+    console.log(ele);
+
+    // aim.appendChild(ele)
+  }
+  // 返回vdom
+  function view() {
+    return h(
+      'div',
+      null,
+      'Hello World',
+      h(
+        'ul',
+        null,
+        h(
+          'li', {
+            id: '1',
+            'class': 'li-1'
+          },
+          '\u7B2C1'
+        )
+      )
+    );
+  }
+  // 把vdom转换成对象
+  function h(tag, props, ...children) {
+    return {
+      tag,
+      props,
+      children: flatten(children) || []
+    }
+  }
+  // 保持嵌套关系
+  function flatten(children) {
+    return [].concat.apply([], children);
+  }
+
+  function createEle(vdom) {
+    // 如果vdom是字符串或者数字类型，则创建文本节点，比如“Hello World”
+    if (typeof vdom === 'string' || typeof vdom === 'number') {
+      return document.createTextNode(vdom);
+    }
+
+    const {
+      tag,
+      props,
+      children
+    } = vdom;
+
+    // 1. 创建元素
+    const element = document.createElement(tag);
+
+    // 2. 属性赋值
+    for (let key in vdom.props) {
+      element.setAttribute(key, vdom.props[key])
+    }
+
+    // 3. 创建子元素
+
+    children.map(createEle)
+      .forEach(element.appendChild.bind(element));
+    return element;
+  }
+</script>
+
+</html>
