@@ -89,6 +89,7 @@
       )
     );
   }
+  
 
   // 创建dom元素
   function createElement(vdom) {
@@ -203,7 +204,7 @@
       }
     }
 
-    // 替换node
+    // 替换node; 不是一个类型； 是简单类型但值不一样； 标签名不一样
     if (
       typeof oldVDom !== typeof newVDom ||
       ((typeof oldVDom === 'string' || typeof oldVDom === 'number') && oldVDom !== newVDom) ||
@@ -214,8 +215,8 @@
         vdom: newVDom
       }
     }
-
-    // 更新node
+    
+    // 更新node； 如果不是新建、删除，替换
     if (oldVDom.tag) {
       // 比较props的变化
       const propsDiff = diffProps(oldVDom, newVDom);

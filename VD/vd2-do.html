@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="box"></div>
+</body>
+<script>
+  let box = document.querySelector('.box')
+  const nodePatchTypes = {
+    update: 'update node',
+    create: 'create node',
+    replace: 'replace node',
+    remove: 'remove node'
+  }
+  const propsPatchTypes = {
+    remove: 'remove props',
+    update: 'update props'
+  }
+  let preVdom = (function () {
+    let preVdom
+    return (function (vdom) {
+      if (vdom) {
+        preVdom = vdom
+      }
+      return preVdom
+    })
+  })()
+  render(box)
+
+  function render(ele) {
+    let vdom = view()
+    preVdom(vdom)
+    let dom = cretaeDom(vdom)
+    ele.appendChild(dom)
+    newVdom()
+  }
+
+  function view(i = 1) {
+    return h(
+      'div',
+      null,
+      'Hello World',
+      h(
+        'ul',
+        null,
+        i % 2 === 0 ? (h(
+          'li', {
+            id: '1',
+            'class': 'li-1'
+          },
+          `\u7B2C${i}`
+        )) : ('xyz')
+      )
+    );
+  }
+  function view2(i = 2) {
+    return h(
+      'div',
+      {id:'p100'},
+      'Hello World',
+      h(
+        'ul',
+        null,
+        i % 2 === 0 ? (h(
+          'li', {
+            id: '1',
+            'class': 'li-1'
+          },
+          `\u7B2C${i}`
+        )) : ('xyz')
+      )
+    );
+  }
+
+  function h(tag, props, ...children) {
+    return {
+      tag,
+      props:props || {},
+      children: flatten(children) || []
+    }
+  }
+
+  function flatten(children) {
+    return [].concat.apply([], children)
+  }
+
+  function cretaeDom(vdom) {
+    if (typeof vdom === 'string' || typeof vdom === 'number') {
+      return document.createTextNode(vdom)
+    }
+    let tag = document.createElement(vdom.tag)
+    for (let key in vdom.props) {
+      tag.setAttribute(key, vdom.props[key])
+    }
+    vdom.children.map(cretaeDom).forEach(tag.appendChild.bind(tag))
+    return tag
+  }
+
+  function newVdom() {
+    let newVdom = view2()
+    // 生成差异对象
+    const patchVdomResult = diffVdom(preVdom(), newVdom);
+  }
+
+  function diffVdom(preVDom, newVDom) {
+    // 1.比较的大节点
+    if (preVDom === undefined) {
+      return {
+        type: nodePatchTypes.create,
+        vdom: newVDom
+      }
+    }
+    if (newVDom === undefined) {
+      return {
+        type: nodePatchTypes.remove
+      }
+    }
+    if (
+      typeof preVDom !== typeof newVDom ||
+      ((typeof preVDom === 'string' || typeof preVDom === 'number') && preVDom !== newVDom) ||
+      preVDom.tag !== newVDom.tag
+    ) {
+      return {
+        type: nodePatchTypes.replace,
+        vdom: newVDom
+      }
+    }
+    // 2.节点都一样的情况下；比较props
+    // 是一个元素的情况下;更新node
+    if (preVDom.tag) {
+      // 比较props的变化
+      const propsDiffResult = diffProps(preVDom, newVDom);
+      // 比较children的变化
+      const childrenDiffResult = diffChildren(preVDom, newVDom);
+      console.log(childrenDiffResult);
+      
+    }
+  }
+  function diffProps(preVDom, newVDom) {
+    let result = []
+    let allProps = {...preVDom.props, ...newVDom.props}
+    Object.keys(allProps).forEach(v=>{
+      const oldProps = preVDom.props[v]
+      const newProps = newVDom.props[v]
+      // 新的没有 就是删除了
+      if (newProps === undefined) {
+        result.push({
+          type: propsPatchTypes.remove,
+          key: v
+        })
+      } else if (oldProps === undefined || newProps !== oldProps) {
+        result.push({
+          type: propsPatchTypes.update,
+          key: v,
+          value: newProps
+        })
+      }
+    })
+    return result
+  }
+  function diffChildren(preVDom, newVDom) {
+    let result = []
+    // 获取长度最大值
+    let num = Math.max(preVDom.children.length, newVDom.children.length)
+    for (let i = 0; i < num; i++) {
+      result.push(
+        diffVdom(preVDom.children[i],newVDom.children[i])
+      )
+    }
+    return result
+  }
+</script>
+
+</html>
