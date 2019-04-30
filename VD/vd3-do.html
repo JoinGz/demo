@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="box"></div>
+</body>
+<script>
+  // 省略patch对象
+  let box = document.querySelector('.box')
+  const propsPatchTypes = {
+    remove: 'remove props',
+    update: 'update props'
+  }
+  render(box)
+
+  function render(ele) {
+    let vdom = view()
+    let dom = cretaeDom(vdom)
+    ele.appendChild(dom)
+    setTimeout(() => {
+      newVdom(ele)
+    }, 2000);
+  }
+
+  function view(i = 2) {
+    return h(
+      'div',
+      null,
+      'Hello World',
+      h(
+        'ul',
+        null,
+        i % 2 === 0 ? (h(
+          'li', {
+            id: '1',
+            'class': 'li-1'
+          },
+          `\u7B2C${i}`
+        )) : ('xyz')
+      )
+    );
+  }
+
+  function view2(i = 2) {
+    return h(
+      'div', {
+        id: 'p100'
+      },
+      'Hello World',
+      h(
+        'ul', {
+          class: 'ul'
+        },
+        i % 2 === 0 ? (h(
+          'li', {
+            id: '1',
+            'class': 'li-2'
+          },
+          `\u7B2C${i+3}`
+        )) : ('xyz')
+      )
+    );
+  }
+
+  function h(tag, props, ...children) {
+    return {
+      tag,
+      props: props || {},
+      children: flatten(children) || []
+    }
+  }
+
+  function flatten(children) {
+    return [].concat.apply([], children)
+  }
+
+  function cretaeDom(vdom) {
+    if (typeof vdom === 'string' || typeof vdom === 'number') {
+      return document.createTextNode(vdom)
+    }
+    let tag = document.createElement(vdom.tag)
+    tag.__props_gz = vdom.props
+    for (let key in vdom.props) {
+      tag.setAttribute(key, vdom.props[key])
+    }
+    vdom.children.map(cretaeDom).forEach(tag.appendChild.bind(tag))
+    return tag
+  }
+
+  function newVdom(ele) {
+    let newVdom = view2()
+    // 生成差异对象
+    const patchVdomResult = diffVdom(newVdom, ele);
+  }
+
+  function diffVdom(newVDom, ele, index = 0) {
+    let firstChildren = ele.childNodes[index]
+    // 新建node
+    if (firstChildren === undefined) {
+      ele.appendChild(cretaeDom(newVDom))
+      return
+    }
+    // 删除node
+    if (newVDom === undefined) {
+      ele.removeChild(firstChildren)
+      return
+    }
+    // 替换note
+    if (!isSameType(firstChildren, newVDom)) {
+      ele.replaceChild(cretaeDom(newVDom), firstChildren)
+      return
+    } else if (firstChildren.nodeType === 1) {
+      diffProps(firstChildren, newVDom);
+      diffChildren(firstChildren, newVDom)
+    }
+  }
+
+  function diffProps(ele, newVDom) {
+    let allProps = {
+      ...ele.__props_gz,
+      ...newVDom.props
+    }
+    Object.keys(allProps).forEach(v => {
+      const oldProps = ele.__props_gz[v]
+      const newProps = newVDom.props[v]
+      // 新的没有 就是删除了
+      if (newProps === undefined) {
+        ele.removeAttribute(oldProps)
+        // 删除元素上的props
+        delete ele.__props_gz[v]
+      } else if (oldProps === undefined || newProps !== oldProps) {
+        ele.setAttribute(v,newProps)
+        // 更新元素上的props
+        ele.__props_gz[v] = newProps
+      }
+    })
+  }
+
+  function diffChildren(ele, newVDom) {
+    // 获取长度最大值
+    let num = Math.max(ele.children.length, newVDom.children.length)
+    for (let i = 0; i < num; i++) {
+        diffVdom( newVDom.children[i], ele, i)
+    }
+  }
+  function isSameType(ele, vdom) {
+    // 先处理文本节点
+    if (ele.nodeType === 3 && (typeof vdom === 'string' || typeof vdom === 'number') && ele.nodeValue === vdom) {
+      return true
+    }
+    // 元素节点
+    if (ele.nodeType === 1 && ele.nodeName.toLowerCase() === vdom.tag) {
+      return true
+    }
+    return false
+  }
+</script>
+
+</html>

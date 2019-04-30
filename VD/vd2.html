@@ -71,7 +71,7 @@
     }
   }
 
-  function view(i = 1) {
+  function view(i = 2) {
     return h(
       'div',
       null,
@@ -84,12 +84,30 @@
             id: '1',
             'class': 'li-1'
           },
-          `\u7B2C${i}`
+          `\u7B2C${i-6}`
         )) : ('xyz')
       )
     );
   }
-  
+  function view2(i = 2) {
+    return h(
+      'div', {
+        id: 'p100'
+      },
+      'Hello World',
+      h(
+        'ul',
+        {class:'ul'},
+        i % 2 === 0 ? (h(
+          'li', {
+            id: '1',
+            'class': 'li-2'
+          },
+          `\u7B2C${i+3}`
+        )) : ('xyz')
+      )
+    );
+  }
 
   // 创建dom元素
   function createElement(vdom) {
@@ -297,12 +315,12 @@
   }
 
   function tick(element, i) {
-    if (i > 20) {
-      clearTimeout(timer);
-      return;
-    }
+    // if (i > 20) {
+      // clearTimeout(timer);
+      // return;
+    // }
 
-    const newVDom = view(i);
+    const newVDom = view2(i);
 
     // 生成差异对象
     const patchObj = diff(preVDom, newVDom);
@@ -322,10 +340,10 @@
     element.appendChild(dom);
 
     // 每500毫秒改变一次state，并生成VD
-    let i = 1
-    timer = setInterval(() => {
-      tick(element, i++);
-    }, 500);
+    // let i = 1
+    timer = setTimeout(() => {
+      tick(element, 2);
+    }, 5000);
   }
 </script>
 

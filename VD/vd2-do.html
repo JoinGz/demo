@@ -39,10 +39,12 @@
     preVdom(vdom)
     let dom = cretaeDom(vdom)
     ele.appendChild(dom)
-    newVdom()
+    setTimeout(() => {
+      newVdom(ele)
+    }, 2000);
   }
 
-  function view(i = 1) {
+  function view(i = 2) {
     return h(
       'div',
       null,
@@ -60,20 +62,22 @@
       )
     );
   }
+
   function view2(i = 2) {
     return h(
-      'div',
-      {id:'p100'},
+      'div', {
+        id: 'p100'
+      },
       'Hello World',
       h(
         'ul',
-        null,
+        {class:'ul'},
         i % 2 === 0 ? (h(
           'li', {
             id: '1',
-            'class': 'li-1'
+            'class': 'li-2'
           },
-          `\u7B2C${i}`
+          `\u7B2C${i+3}`
         )) : ('xyz')
       )
     );
@@ -82,7 +86,7 @@
   function h(tag, props, ...children) {
     return {
       tag,
-      props:props || {},
+      props: props || {},
       children: flatten(children) || []
     }
   }
@@ -103,10 +107,14 @@
     return tag
   }
 
-  function newVdom() {
+  function newVdom(ele) {
     let newVdom = view2()
     // 生成差异对象
     const patchVdomResult = diffVdom(preVdom(), newVdom);
+    // 更新最新vdom
+    preVdom(newVdom)
+    patch(ele, patchVdomResult)
+
   }
 
   function diffVdom(preVDom, newVDom) {
@@ -139,14 +147,24 @@
       const propsDiffResult = diffProps(preVDom, newVDom);
       // 比较children的变化
       const childrenDiffResult = diffChildren(preVDom, newVDom);
-      console.log(childrenDiffResult);
-      
+
+      if (propsDiffResult.length > 0 || childrenDiffResult.some(v => (v !== undefined))) {
+        return {
+          type: nodePatchTypes.update,
+          props: propsDiffResult,
+          children: childrenDiffResult
+        }
+      }
     }
   }
+
   function diffProps(preVDom, newVDom) {
     let result = []
-    let allProps = {...preVDom.props, ...newVDom.props}
-    Object.keys(allProps).forEach(v=>{
+    let allProps = {
+      ...preVDom.props,
+      ...newVDom.props
+    }
+    Object.keys(allProps).forEach(v => {
       const oldProps = preVDom.props[v]
       const newProps = newVDom.props[v]
       // 新的没有 就是删除了
@@ -165,16 +183,60 @@
     })
     return result
   }
+
   function diffChildren(preVDom, newVDom) {
     let result = []
     // 获取长度最大值
     let num = Math.max(preVDom.children.length, newVDom.children.length)
     for (let i = 0; i < num; i++) {
       result.push(
-        diffVdom(preVDom.children[i],newVDom.children[i])
+        diffVdom(preVDom.children[i], newVDom.children[i])
       )
     }
     return result
+  }
+
+  function patch(ele, patchVdomResult, index = 0) {
+    if (!patchVdomResult) {
+      return;
+    }
+    // 创建
+    if (patchVdomResult.type === nodePatchTypes.create) {
+      ele.appendChild(cretaeDom(patchVdomResult.vdom))
+    }
+    let firstChildren = ele.childNodes[index]
+    // 替换
+    if (patchVdomResult.type === nodePatchTypes.replace) {
+      ele.replaceChild(cretaeDom(patchVdomResult.vdom), firstChildren)
+    }
+    // 删除元素
+    if (patchVdomResult.type === nodePatchTypes.remove) {
+      ele.removeChild(firstChildren)
+    }
+    // 更新元素
+    if (patchVdomResult.type === nodePatchTypes.update) {
+      let {
+        props,
+        children
+      } = patchVdomResult
+      updateProps(firstChildren, props)
+      children.forEach((patchObj, i) => {
+        patch(firstChildren, patchObj, i)
+      })
+    }
+  }
+
+  function updateProps(ele, props) {
+    if (!props) {
+      return
+    }
+    props.forEach(propsItem => {
+      if (propsItem.type === propsPatchTypes.remove) {
+        ele.removeAttribute(propsItem.key)
+      } else if (propsItem.type === propsPatchTypes.update) {
+        ele.setAttribute(propsItem.key, propsItem.value)
+      }
+    })
   }
 </script>
 
