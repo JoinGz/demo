@@ -6,46 +6,125 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-  <style>
-    body {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    .li-1 {
-      background: red
-    }
-
-    .li-2 {
-      background: green
-    }
-
-    .li-3 {
-      background: yellow
-    }
-
-    .li-4 {
-      background: purple
-    }
-
-    .li-0 {
-      background: gray
-    }
-  </style>
 </head>
 
 <body>
+  <style>
+    body { margin: 0; font-size: 24; font-family: sans-serif }
+    .li-1 { background: red }
+    .li-2 { background: green }
+    .li-3 { background: yellow }
+    .li-4 { background: purple }
+    .li-0 { background: gray }
+  </style>
   <main id="main"></main>
+  
 </body>
 <script>
-  var main = document.getElementById('main')
   const doc = document;
-  const ATTR_KEY = '__preprops_';
-let arr = [1,2,3];
-let arr2 = [1,3]
-  render(main)
+  const nodePatchTypes = {
+    CREATE: 'create node',
+    REMOVE: 'remove node',
+    REPLACE: 'replace node',
+    UPDATE: 'update node'
+  }
+  const propPatchTypes = {
+    REMOVE: 'remove prop',
+    UPDATE: 'update prop'
+  }
 
+  let state = {
+    num: 5
+  };
   let timer;
+
+  const ATTR_KEY = '__preprops_';
+
+  const arr = [0, 1, 2, 3, 4];
+
+  class Component {
+    constructor(props) {
+      this.props = props;
+      this.state = {};
+    }
+
+    setState(newState) {
+      this.state = {
+        ...this.state,
+        ...newState
+      };
+      const vdom = this.render();
+      diff(this.dom, vdom, this.parent);
+    }
+
+    render() {
+      throw new Error('component should define its own render method')
+    }
+  };
+
+  function buildComponentFromVDom(dom, vdom, parent) {
+    const cpnt = vdom.tag;
+    if (!typeof cpnt === 'function') {
+      throw new Error('vdom is not a component type');
+    }
+
+    const props = getVDomProps(vdom);
+    let componentInst = dom && dom._component;
+
+    // 创建组件
+    if (componentInst == undefined) {
+      try {
+        componentInst = new cpnt(props);
+        setTimeout(() => {
+          componentInst.setState({
+            name: 'Dickens'
+          })
+        }, 5000);
+      } catch (error) {
+        throw new Error(`component creation error: ${cpnt.name}`);
+      }
+    }
+    // 组件更新 
+    else {
+      componentInst.props = props;
+    }
+
+    const componentVDom = componentInst.render();
+
+    diff(dom, componentVDom, parent, componentInst);
+  }
+
+  function getVDomProps(vdom) {
+    const props = vdom.props;
+    props.children = vdom.children;
+
+    return props;
+  }
+
+  class MyComp extends Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        name: 'Tina'
+      }
+    }
+
+    render() {
+      return (
+        h("div", null, h("div", null, "This is My Component! ", this.props.count), h("div", null, "name: ", this
+          .state.name))
+
+
+      )
+    }
+  }
+
+  function setState(newState) {
+    state = {
+      ...state,
+      ...newState
+    };
+  }
 
   function flatten(arr) {
     return []
@@ -61,43 +140,29 @@ let arr2 = [1,3]
       children: flatten(children) || []
     }
   }
-  function view(i=0) {
-    return h(
-      'div',
-      null,
-      'Hello World',
-      h(
-        'ul',
-        null,
-        arr.map(function (i) {
+
+  function view() {
+    const elm = arr.pop();
+
+    // 用于测试能不能正常删除元素
+    if (state.num !== 9) arr.unshift(elm);
+
+    // 用于测试能不能正常添加元素
+    if (state.num === 12) arr.push(9);
+
+    return (
+      h("div", null, "Hello World", h(MyComp, {
+        count: state.num
+      }), h("ul", {
+        myText: "dickens"
+      }, arr.map(function (i) {
         return h("li", {
           id: i,
           class: "li-".concat(i),
           key: i
         }, "\u7B2C", i)
-      })
-      )
-    );
-
-  }
-  function view2(i=0) {
-    return h(
-      'div',
-      null,
-      'Hello World',
-      h(
-        'ul',
-        null,
-        arr2.map(function (i) {
-        return h("li", {
-          id: i,
-          class: "li-".concat(i),
-          key: i
-        }, "\u7B2C", i)
-      })
-      )
-    );
-
+      })))
+    )
   }
 
   // 创建dom元素
@@ -120,8 +185,9 @@ let arr2 = [1,3]
     setProps(element, props);
 
     // 3. 创建子元素
-    children.map(createElement)
-      .forEach(element.appendChild.bind(element));
+    children.map((vchild) => {
+      diff(undefined, vchild, element);
+    })
 
     return element;
   }
@@ -258,10 +324,24 @@ let arr2 = [1,3]
     }
   }
 
-  function diff(dom, newVDom, parent) {
+  function diff(dom, newVDom, parent, componentInst) {
+    if (typeof newVDom == 'object' && typeof newVDom.tag == 'function') {
+      buildComponentFromVDom(dom, newVDom, parent);
+      return false;
+    }
+
     // 新建node
     if (dom == undefined) {
-      parent.appendChild(createElement(newVDom));
+      const dom = createElement(newVDom);
+
+      // 自定义组件
+      if (componentInst) {
+        dom._component = componentInst;
+        dom._componentConstructor = componentInst.constructor;
+        componentInst.dom = dom;
+      }
+
+      parent.appendChild(dom);
       return false;
     }
 
@@ -291,6 +371,10 @@ let arr2 = [1,3]
 
   // 比较元素类型是否相同
   function isSameType(element, newVDom) {
+    if (typeof newVDom.tag == 'function') {
+      return element._componentConstructor == newVDom.tag;
+    }
+
     const elmType = element.nodeType;
     const vdomType = typeof newVDom;
 
@@ -311,12 +395,12 @@ let arr2 = [1,3]
   }
 
   function tick(element) {
-    // if (state.num > 20) {
-    //   clearTimeout(timer);
-    //   return;
-    // }
+    if (state.num > 10) {
+      clearTimeout(timer);
+      return;
+    }
 
-    const newVDom = view2();
+    const newVDom = view();
     const dom = element.firstChild;
 
     // 比较并更新节点
@@ -333,11 +417,14 @@ let arr2 = [1,3]
     element.appendChild(dom);
 
     // 每500毫秒改变一次state，并生成VD
-    setInterval(() => {
-      // state.num += 1;
+    timer = setInterval(() => {
+      state.num += 1;
       tick(element);
-    }, 3000);
+    }, 500);
   }
 </script>
-
+<script>
+    var main = document.getElementById('main')
+    render(main)
+  </script>
 </html>
