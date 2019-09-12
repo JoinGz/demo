@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<!-- <script>
+  function pro(i) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        console.log(i)
+        resolve(i)
+      }, 1000)
+    })
+  }
+  async function fot() {
+    for (let i = 0; i < 5; i++) {
+      await pro(i)
+    }
+    console.log('i')
+  }
+  fot()
+</script> -->
+<script>
+  // const CronJob = require('cron').CronJob
+  // // 每月的1日1点1分30秒触发 ：'30 1 1 1 * *'
+  // // UA.config.runtime == 'production'
+  // let getStaffIdStatus = false
+  // let staffIdList = []
+  // // let url =
+  // const puppeteer = require('puppeteer')
+  // let browser, page, oncebrowserStart
+  // async function browserStart() {
+  //   console.log('浏览器开启')
+  //   browser = await puppeteer.launch({
+  //     headless: true
+  //   })
+  //   page = await browser.newPage()
+  //   oncebrowserStart = true
+  //   return new Promise((resolve, reject) => {
+  //     resolve(1)
+  //   }) 
+  // }
+  // async function getBase64({ userId, staffId }) {
+  //   if (!oncebrowserStart) {
+  //     await browserStart()
+  //   }
+  //   console.log(`'请求开始'${userId}`)
+  //   await page.goto(
+  //     `http://work.cs.test.zbjdev.com/pic2c/?userid=${userId}&&auth=pic2c`
+  //   )
+  //   let taskResult = await page.screenshot({
+  //     encoding: 'base64'
+  //   })
+  //   let data = {
+  //     userId,
+  //     taskResult
+  //   }
+  //   try {
+  //     let reuslt =  await platformUserOperationService.uploadStaffTask(data)
+  //     console.log('保存结果')
+  //     return new Promise((resolve, reject) => {
+  //         // resolve(rs)
+  //         resolve(1)
+  //     })
+  //   } catch (error) {
+  //       console.log('保存失败')    
+  //   }
+  //   // platformUserOperationService
+  //   //   .uploadStaffTask(data)
+  //   //   .then(rs => {
+  //   //     console.log('保存结果')
+  //   //     console.dir(rs)
+  //   //     return new Promise((resolve, reject) => {
+  //   //       // resolve(rs)
+  //   //       resolve(1)
+
+  //   //     })
+  //   //   })
+  //   //   .catch(rs => {
+  //   //     console.log('保存失败')
+  //   //     resolve(rs)
+  //   //   })
+  //   console.log(`'请求结束'${userId}`)
+  // }
+  // const timer = new CronJob('01 08 19 19 * *', async function() {
+  //   platformUserQueryService
+  //     .queryTaskStaffId({
+  //       zbjId: 66969594 // 乱输入的，只为格式
+  //     })
+  //     .then(rs => {
+  //       if (rs.success) {
+  //         getStaffIdStatus = true
+  //         staffIdList = rs.data || [] //  [ { staffId: 22, userId: 3 } ]
+  //         staffIdList = staffIdList.slice(0, 3)
+  //         staffIdList.forEach(async function (v) {
+  //           await getBase64(v)
+  //         })
+  //         console.log('浏览器关闭')
+  //         browser.close()
+  //       }
+  //       // console.dir(rs)
+  //     })
+  // })
+  // // 定时器取消
+  // // timer.stop()
+  // timer.start()
+</script>
+<script>
+  // const CronJob = require('cron').CronJob
+  // // 每月的1日1点1分30秒触发 ：'30 1 1 1 * *'
+  // // UA.config.runtime == 'production'
+  // let getStaffIdStatus = false
+  // let staffIdList = []
+  // // let url =
+  // const puppeteer = require('puppeteer')
+  let browser, page, oncebrowserStart
+
+  function puppeteer() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        console.log('browser启动完毕');
+        resolve('browser')
+      }, 1000);
+    })
+  }
+
+  function newPage() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        console.log('page到达');
+        resolve('page')
+      }, 2000);
+    })
+  }
+  async function browserStart() {
+    console.log('浏览器开启')
+    browser = await puppeteer()
+    page = await newPage()
+    oncebrowserStart = true
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(1)
+
+      }, 1000);
+    })
+  }
+  async function pagegoto(id) {
+    console.log(`当前页面${id}`);
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+
+        reject(1959)
+      }, 1000);
+    })
+  }
+  async function uploadStaffTask() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(1)
+
+      }, 1000);
+    })
+  }
+  async function getBase64({
+    userId,
+    staffId
+  }) {
+    if (!oncebrowserStart) {
+      await browserStart()
+    }
+    console.log(`'请求开始'${userId}`)
+    await pagegoto(
+      userId
+    )
+    let data = {
+      userId,
+    }
+    try {
+      let reuslt = uploadStaffTask(data)
+      console.log('保存结果')
+      return new Promise((resolve, reject) => {
+        // resolve(rs)
+        setTimeout(() => {
+          reject(1)
+
+        }, 1000);
+      })
+    } catch (error) {
+      console.log('保存失败')
+    }
+    // platformUserOperationService
+    //   .uploadStaffTask(data)
+    //   .then(rs => {
+    //     console.log('保存结果')
+    //     console.dir(rs)
+    //     return new Promise((resolve, reject) => {
+    //       // resolve(rs)
+    //       resolve(1)
+
+    //     })
+    //   })
+    //   .catch(rs => {
+    //     console.log('保存失败')
+    //     resolve(rs)
+    //   })
+    console.log(`'请求结束'${userId}`)
+  }
+  // const timer = new CronJob('01 08 19 19 * *', async function() {
+  //   platformUserQueryService
+  //     .queryTaskStaffId({
+  //       zbjId: 66969594 // 乱输入的，只为格式
+  //     })
+  //     .then(rs => {
+  //       if (rs.success) {
+  //         getStaffIdStatus = true
+  // staffIdList = rs.data || [] //  [ { staffId: 22, userId: 3 } ]
+  // staffIdList = staffIdList.slice(0, 3)
+  async function name(params) {
+    staffIdList = [{
+      staffId: 22,
+      userId: 1
+    }, {
+      staffId: 22,
+      userId: 2
+    }, {
+      staffId: 22,
+      userId: 3
+    }]
+    // for (let index = 0; index < staffIdList.length; index++) {
+    //   const v = staffIdList[index];
+    //   try {
+    //     await getBase64(v)
+    //   } catch (error) {
+    //     console.log(error);
+    //     continue
+
+    //   }
+    // }
+    for ( let key in staffIdList){
+      try {
+        
+      await getBase64(staffIdList[key])
+      } catch (error) {
+        
+      }
+    }
+    console.log('浏览器关闭')
+    console.log(browser)
+  }
+  name()
+  //       }
+  //       // console.dir(rs)
+  //     })
+  // })
+  // // 定时器取消
+  // // timer.stop()
+  // timer.start()
+  // 参考: https://www.jianshu.com/p/fcb1ff417e6c
+</script>
+
+</html>
