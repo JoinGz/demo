@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div id="test"></div>
+</body>
+<script>
+  let test = document.querySelector('#test')
+  // 生成vdom
+  function h(tag, props, ...children) {
+    return {
+      tag,
+      props: props || {},
+      children: flatten(children) || []
+    }
+  }
+  function render() {
+    diff(test, vdom)
+  }
+  function diff(dom, vdom, parent) {
+    if (dom == undefined) {
+      parent.appendChild(createElement(vdom))
+    }
+  }
+  function createElement(vdom) {
+    if(!vdom.tag && (typeof vdom.children == 'number' || typeof vdom.children == 'string')) {
+      document.createTextNode(vdom.children)
+    }
+    let ele = document.createElement(vdom.tag)
+    ele.appendChild(createElement(vdom.children))
+  }
+</script>
+</html>
