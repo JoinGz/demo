@@ -10,7 +10,11 @@
   <div id="test"></div>
 </body>
 <script>
+  // keys常量
+  const KEYS = 'KEYS'
   let test = document.querySelector('#test')
+  let arr2 = [1]
+  let arr3 = [3]
   // 生成vdom
   function h(tag, props, ...children) {
     return {
@@ -19,20 +23,130 @@
       children: flatten(children) || []
     }
   }
-  function render() {
-    diff(test, vdom)
+  function flatten(likeArr) {
+    return [].concat.apply([], likeArr)
+  }
+  function render(vdom) {
+    diff(test, vdom, test)
   }
   function diff(dom, vdom, parent) {
     if (dom == undefined) {
       parent.appendChild(createElement(vdom))
     }
+    if(vdom == undefined) {
+      parent.removeChild(dom)
+    }
+    if (!isSameNodeType(dom, vdom)) {
+      parent.replaceChild(createElement(vdom),dom)
+    }
+    if (dom.nodeType === Node.ELEMENT_NODE) {
+      diffProps(dom, vdom)
+      // diffChildren(dom, vdom)
+    }
   }
   function createElement(vdom) {
-    if(!vdom.tag && (typeof vdom.children == 'number' || typeof vdom.children == 'string')) {
-      document.createTextNode(vdom.children)
+    if(typeof vdom == 'number' || typeof vdom == 'string') {
+      return document.createTextNode(vdom)
     }
     let ele = document.createElement(vdom.tag)
-    ele.appendChild(createElement(vdom.children))
+    setProps(ele,vdom.props)
+    for (let i = 0; i < vdom.children.length; i++) {
+      const element = vdom.children[i];
+      ele.appendChild(createElement(element))
+    }
+    // vdom.children.map(createElement)
+    //   .forEach(ele.appendChild.bind(ele));
+    return ele
+  }
+  function setProps(ele, props) {
+    ele[KEYS] = props
+    for (const key in props) {
+      if (props.hasOwnProperty(key)) {
+        const element = props[key];
+        ele.setAttribute(key, element)
+      }
+    }
+  }
+  function isSameNodeType(dom, vdom) {
+    const domType = dom.nodeType
+    const vdomType = typeof vdom
+    if (domType === Node.TEXT_NODE && (vdomType === 'number' || vdomType === 'string') && dom.nodeValue === vdom) {
+      return true
+    }
+    // tagName只能用在元素节点上，而nodeName可以用在任何节点上，可以说nodeName涵盖了tagName，并且具有更多的功能，因此建议总是使用nodeName。
+    if (domType === Node.ELEMENT_NODE && dom.tagName.toLowerCase() === vdom.tag) {
+      return true;
+    }
+    return false
+  }
+  // console.log(render(test,view2()));
+  // console.log(
+  //     setTimeout(() => {
+  //       render(test,view3())
+  //     }, 1000)
+  // );
+
+  function diffProps(dom, vdom) {
+    let domProps = dom[KEYS] || {}
+    let allProps = {
+      ...domProps,
+      ...vdom.props
+    }
+    Object.keys(allProps).forEach(key => {
+      let domPropsValue = domProps[key]
+      let vdomPropsValue = vdom.props[key]
+
+      if (vdomPropsValue === undefined) {
+        dom.removeAttribute(key)
+        delete domProps[key]
+      } else if (domPropsValue === undefined || domPropsValue !== vdomPropsValue) {
+        dom.setAttribute(key, vdomPropsValue)
+        domProps[key] = vdomPropsValue
+      }
+    });
+    dom[KEYS] = domProps
+  }
+  
+
+
+  function view2() {
+    return h(
+      'div',
+      null,
+      'Hello World',
+      h(
+        'ul',
+        null,
+        arr2.map(function (i) {
+        return h("li", {
+          id: i,
+          class: "li-".concat(i),
+          key: i
+        }, "\u7B2C", i)
+      })
+      )
+    );
+
+  }
+  
+  function view3() {
+    return h(
+      'div',
+      {j:4,l:8},
+      'Hello World',
+      h(
+        'ul',
+        null,
+        arr3.map(function (i) {
+        return h("li", {
+          id: i,
+          class: "li-".concat(i),
+          key: i
+        }, "\u7B2C", i)
+      })
+      )
+    );
+
   }
 </script>
 </html>
