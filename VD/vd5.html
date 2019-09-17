@@ -326,6 +326,8 @@
 
   function diff(dom, newVDom, parent, componentInst) {
     if (typeof newVDom == 'object' && typeof newVDom.tag == 'function') {
+      console.log(newVDom);
+      
       buildComponentFromVDom(dom, newVDom, parent);
       return false;
     }

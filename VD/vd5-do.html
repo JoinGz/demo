@@ -19,6 +19,38 @@
   let test = document.querySelector('#test')
   let arr2 = [1]
   let arr3 = [3,2,1]
+  class Component {
+    constructor (props) {
+      this.props = props
+      this.state = {}
+    }
+    setState (state) {
+      this.state = {
+        ...this.state,
+        ...state
+      }
+      const vdom = this.render()
+      diff(this.vdom, vdom, this.parent)
+    }
+    render () {
+      throw new Error('没有render方法')
+    }
+  }
+
+  class Mycom extends Component {
+    constructor(props) {
+      super(props)
+      this.setState({code: 666})
+    }
+    render() {
+      return (
+        h("div", null, h("div", null, "This is My Component! ", this.props.count), h("div", null, "name: ", this
+          .state.code))
+
+
+      )
+    }
+  }
   // 生成vdom
   function h(tag, props, ...children) {
     return {
@@ -34,6 +66,10 @@
     diff(dom.firstChild, vdom, dom )
   }
   function diff(dom, vdom, nowDom) {
+    if (typeof vdom === 'object' && typeof vdom.tag === 'function') {
+      buildComponentFromVdom(dom, vdom, nowDom)
+      return false
+    }
     if (dom == undefined) {
       nowDom.appendChild(createElement(vdom))
       return false
@@ -107,8 +143,9 @@
             if (j === min) {
               min++
             }
-            // if (j === withoutkeyCount - 1) withoutkeyCount--;
-
+            if (j === withoutkeyCount - 1){
+              withoutkeyCount--;
+            }
             break;
           }
         }
