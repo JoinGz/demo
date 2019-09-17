@@ -7,14 +7,18 @@
   <title>Document</title>
 </head>
 <body>
-  <div id="test"></div>
+  <div id="test">
+    <p>
+      456
+    </p>
+  </div>
 </body>
 <script>
   // keys常量
   const KEYS = 'KEYS'
   let test = document.querySelector('#test')
   let arr2 = [1]
-  let arr3 = [3]
+  let arr3 = [3,2,1]
   // 生成vdom
   function h(tag, props, ...children) {
     return {
@@ -26,24 +30,141 @@
   function flatten(likeArr) {
     return [].concat.apply([], likeArr)
   }
-  function render(vdom) {
-    diff(test, vdom, test)
+  function render(dom,vdom) {
+    diff(dom.firstChild, vdom, dom )
   }
-  function diff(dom, vdom, parent) {
+  function diff(dom, vdom, nowDom) {
     if (dom == undefined) {
-      parent.appendChild(createElement(vdom))
+      nowDom.appendChild(createElement(vdom))
+      return false
     }
     if(vdom == undefined) {
-      parent.removeChild(dom)
+      nowDom.removeChild(dom)
+      return false
     }
     if (!isSameNodeType(dom, vdom)) {
-      parent.replaceChild(createElement(vdom),dom)
+      nowDom.replaceChild(createElement(vdom),dom)
+      return false
     }
     if (dom.nodeType === Node.ELEMENT_NODE) {
       diffProps(dom, vdom)
-      // diffChildren(dom, vdom)
+      diffChildren(dom, vdom)
     }
+    return true
   }
+
+  function diffChildren(firstChildDom, vdom) {
+    console.log(firstChildDom);
+    /*
+    将所有dom子元素分为有key和没key两组
+    遍历VD子元素，如果VD子元素有key，则去查找有key的分组；如果没key，则去没key的分组找一个类型相同的元素出来
+    diff一下，得出是否更新元素的类型
+    如果是更新元素且子元素不是原来的，则移动元素
+    最后清理删除没用上的dom子元素
+    */
+    // let num = Math.max(firstChildDom.childNodes.length, vdom.children.length)
+    // for (let i = 0; i < num; i++) {
+    //   diff(firstChildDom, vdom.children[i], i)
+    // }
+    let withKey = {}
+    let withKeyCount = 0
+    let withoutKey = {}
+    let withoutkeyCount = 0
+    let childnodes = firstChildDom.childNodes
+    let childnodesLength = childnodes.length
+    let vdomChild = vdom.children
+    let vdomCHildLength = vdomChild.length
+    // let hasKeyDom = []
+    // 用于优化没key子元素的数组遍历
+    let min = 0;
+
+    for (let i = 0; i < childnodesLength; i++) {
+      if(childnodes[i][KEYS] && childnodes[i][KEYS]['key']) {
+        withKeyCount++
+        withKey[childnodes[i][KEYS]['key']] = childnodes[i]
+      } else {
+        withoutKey[withoutkeyCount++] = childnodes[i]
+      }
+    }
+    for (let i = 0; i < vdomCHildLength; i++) {
+      let dom
+      if(vdomChild[i].props && vdomChild[i]['props']['key']) {
+        // 根据key来查找对应元素
+        // 说明这个key还在用
+        if (withKeyCount && withKey[vdomChild[i]['props']['key']]) {
+          // 把这个dom取出来
+          dom = withKey[vdomChild[i]['props']['key']]
+          withKeyCount--
+          withKey[vdomChild[i]['props']['key']] = undefined
+        }
+      } else if (min < withoutkeyCount) {
+      // 如果没有key字段，则找一个类型相同的元素出来做比较
+        for (let j = 0; j < withoutkeyCount; j++) {
+          const node = withoutKey[j];
+          if ( node && isSameNodeType(node, vdomChild[i])) {
+            dom = node
+            withoutKey[j] = undefined
+            if (j === min) {
+              min++
+            }
+            // if (j === withoutkeyCount - 1) withoutkeyCount--;
+
+            break;
+          }
+        }
+      }
+      // if(dom == null) {
+      //   debugger
+      // }
+      // diff返回是否更新元素
+      let isUpdate = diff(dom, vdomChild[i], firstChildDom)
+      // 如果是更新元素，且不是同一个dom元素，则移动到原先的dom元素之前
+       if (isUpdate) {
+         if (dom !== childnodes[i]) {
+           console.log('进入了');
+          //  let obj = {}
+          //  obj.dom = dom
+          //  obj.i = i
+          //  obj.firstChildDom = firstChildDom
+          //  hasKeyDom.push(obj)
+          //  debugger
+          //  if (dom[KEYS].key > childnodes[i][KEYS].key) {
+              firstChildDom.insertBefore(dom, childnodes[i])
+          //  } else {
+          //     firstChildDom.insertBefore( childnodes[i], dom)
+
+          //  }
+         }
+       }
+
+       
+      
+    }
+    // console.log(hasKeyDom);
+    // hasKeyDom.forEach(v=>{
+    //   console.log('zi');
+    //   v.firstChildDom.insertBefore(v.dom, v.firstChildDom.childNodes[v.i])
+    // })
+    if (withKeyCount) {
+         for (const key in withKey) {
+           if (withKey.hasOwnProperty(key)) {
+             const element = withKey[key];
+             if (element !== undefined) {
+               element.parentNode.removeChild(element)
+             }
+           }
+         }
+       }
+
+       while (min <= withoutkeyCount) {
+        const node = withoutKey[withoutkeyCount--]
+        if (node !== undefined) {
+          node.parentNode.removeChild(node)
+        }
+       }
+
+  }
+
   function createElement(vdom) {
     if(typeof vdom == 'number' || typeof vdom == 'string') {
       return document.createTextNode(vdom)
@@ -79,12 +200,13 @@
     }
     return false
   }
-  // console.log(render(test,view2()));
-  // console.log(
-  //     setTimeout(() => {
-  //       render(test,view3())
-  //     }, 1000)
-  // );
+  // console.log(view3());
+  console.log(render(test,view2()));
+  console.log(
+      setTimeout(() => {
+        render(test,view3())
+      }, 3000)
+  );
 
   function diffProps(dom, vdom) {
     let domProps = dom[KEYS] || {}
