@@ -30,7 +30,7 @@
         ...state
       }
       const vdom = this.render()
-      diff(this.vdom, vdom, this.parent)
+      diff(this.dom, vdom, this.parent)
     }
     render () {
       throw new Error('没有render方法')
@@ -40,11 +40,14 @@
   class Mycom extends Component {
     constructor(props) {
       super(props)
-      this.setState({code: 666})
+      this.state= {code: 666}
+    }
+    elmClick () {
+      this.setState({code: 777})
     }
     render() {
       return (
-        h("div", null, h("div", null, "This is My Component! ", this.props.count), h("div", null, "name: ", this
+        h("div", null, h("div", {onClick: this.elmClick.bind(this)}, "This is My Component! ", this.props.count), h("div", null, "name: ", this
           .state.code))
 
 
@@ -65,13 +68,19 @@
   function render(dom,vdom) {
     diff(dom.firstChild, vdom, dom )
   }
-  function diff(dom, vdom, nowDom) {
+  function diff(dom, vdom, nowDom, componentInst) {
     if (typeof vdom === 'object' && typeof vdom.tag === 'function') {
       buildComponentFromVdom(dom, vdom, nowDom)
       return false
     }
     if (dom == undefined) {
-      nowDom.appendChild(createElement(vdom))
+      const ele = createElement(vdom)
+      if (componentInst) {
+        ele._component = componentInst
+        ele._componentConstructor = componentInst.constructor
+        componentInst.dom = ele
+      }
+      nowDom.appendChild(ele)
       return false
     }
     if(vdom == undefined) {
@@ -89,6 +98,43 @@
     return true
   }
 
+  function buildComponentFromVdom(dom, vdom, parent) {
+    /*
+    如果是自定义组件，会调用buildComponentFromVDom方法。
+    先通过getVDomProps方法获取vdom最新的属性，包括children。
+    如果dom对象有_component属性，说明是组件更新的过程，否则为组件创建的过程。
+    如果是创建过程则直接实例化一个对象，setTimeout部分主要为了验证setState能不能正常工作，可以先忽略。
+    如果是更新过程，则传入最新的props。最后通过组件的render方法得到最新的vdom后，再进行diff操作。
+    */
+    const tag = vdom.tag
+    if (!typeof tag === 'function') {
+      throw new Error('必须是一个函数组件')
+    }
+    const props = getVdomProps(vdom)
+    let componentInst = dom && dom._component
+    if (componentInst == undefined) {
+      // 创建组件
+      try {
+        componentInst = new tag(props)
+        setTimeout(() => {
+          componentInst.setState({
+            code: 'GzTest'
+          })
+        }, 5000);
+      } catch (error) {
+        throw new Error(`${tag.name}组件创建错误`)
+      }
+    } else {
+      componentInst.props = props
+    }
+    const componentVdom = componentInst.render()
+    diff(dom, componentVdom, parent, componentInst)
+  }
+  function getVdomProps(vdom) {
+    const props = vdom.props
+    props.children = vdom.children
+    return props
+  }
   function diffChildren(firstChildDom, vdom) {
     console.log(firstChildDom);
     /*
@@ -210,7 +256,9 @@
     setProps(ele,vdom.props)
     for (let i = 0; i < vdom.children.length; i++) {
       const element = vdom.children[i];
-      ele.appendChild(createElement(element))
+      // 组件是函数，不能直接创建了
+      diff(undefined, element , ele)
+      // ele.appendChild(createElement(element))
     }
     // vdom.children.map(createElement)
     //   .forEach(ele.appendChild.bind(ele));
@@ -221,14 +269,28 @@
     for (const key in props) {
       if (props.hasOwnProperty(key)) {
         const element = props[key];
-        ele.setAttribute(key, element)
+        if (key.slice(0,2) === 'on') {
+          let eventName = key.slice(2).toLowerCase()
+          ele.addEventListener(eventName, eventFn)
+          ele.eventFn || (ele.eventFn = {})
+          ele.eventFn[eventName] = element
+        } else {
+          ele.setAttribute(key, element)
+        }
       }
     }
+  }
+  function eventFn(evt) {
+    this.eventFn[evt.type](evt)
   }
   function isSameNodeType(dom, vdom) {
     const domType = dom.nodeType
     const vdomType = typeof vdom
-    if (domType === Node.TEXT_NODE && (vdomType === 'number' || vdomType === 'string') && dom.nodeValue === vdom) {
+    if (typeof vdom.tag == 'function') {
+        return dom._componentConstructor == vdom.tag;
+    }
+    // 渲染出来都是字符串，字符串和数字就==判断了
+    if (domType === Node.TEXT_NODE && (vdomType === 'number' || vdomType === 'string') && dom.nodeValue == vdom) {
       return true
     }
     // tagName只能用在元素节点上，而nodeName可以用在任何节点上，可以说nodeName涵盖了tagName，并且具有更多的功能，因此建议总是使用nodeName。
@@ -239,11 +301,11 @@
   }
   // console.log(view3());
   console.log(render(test,view2()));
-  console.log(
-      setTimeout(() => {
-        render(test,view3())
-      }, 3000)
-  );
+  // console.log(
+  //     setTimeout(() => {
+  //       render(test,view3())
+  //     }, 3000)
+  // );
 
   function diffProps(dom, vdom) {
     let domProps = dom[KEYS] || {}
@@ -255,12 +317,23 @@
       let domPropsValue = domProps[key]
       let vdomPropsValue = vdom.props[key]
 
-      if (vdomPropsValue === undefined) {
+      if( key.slice(0,2)==='on' ) {
+          let eventName = key.slice(2).toLowerCase()
+        if (vdomPropsValue) {
+          dom.addEventListener(eventName, eventFn)
+        } else {
+          dom.removeEventListener(eventName, eventFn)
+        }
+        dom.eventFn || (dom.eventFn = {})
+        dom.eventFn[eventName] = vdomPropsValue
+      } else {
+        if (vdomPropsValue === undefined) {
         dom.removeAttribute(key)
         delete domProps[key]
       } else if (domPropsValue === undefined || domPropsValue !== vdomPropsValue) {
         dom.setAttribute(key, vdomPropsValue)
         domProps[key] = vdomPropsValue
+      }
       }
     });
     dom[KEYS] = domProps
@@ -269,22 +342,9 @@
 
 
   function view2() {
-    return h(
-      'div',
-      null,
-      'Hello World',
-      h(
-        'ul',
-        null,
-        arr2.map(function (i) {
-        return h("li", {
-          id: i,
-          class: "li-".concat(i),
-          key: i
-        }, "\u7B2C", i)
-      })
-      )
-    );
+    return h("div", null, "Hello World", h(Mycom, {
+        count: '6',
+      }))
 
   }
   

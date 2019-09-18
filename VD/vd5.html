@@ -152,16 +152,8 @@
 
     return (
       h("div", null, "Hello World", h(MyComp, {
-        count: state.num
-      }), h("ul", {
-        myText: "dickens"
-      }, arr.map(function (i) {
-        return h("li", {
-          id: i,
-          class: "li-".concat(i),
-          key: i
-        }, "\u7B2C", i)
-      })))
+        count: 6
+      }))
     )
   }
 
@@ -419,10 +411,10 @@
     element.appendChild(dom);
 
     // 每500毫秒改变一次state，并生成VD
-    timer = setInterval(() => {
-      state.num += 1;
-      tick(element);
-    }, 500);
+    // timer = setInterval(() => {
+    //   state.num += 1;
+    //   tick(element);
+    // }, 500);
   }
 </script>
 <script>
