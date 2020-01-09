@@ -89,4 +89,83 @@ new AjPromise((resolve, reject) => {
   });
 
 </script>
+
+<script>
+  // 两个月后自己在写的版本
+  class myPromise {
+    constructor (fn) {
+      this.List = []
+      this.List.push(fn)
+      this.status = ''
+      this.resolveList = []
+      try {
+        this.status = 'pending'
+        this.List.forEach(v=>{
+          v(this.resolve.bind(this))
+        }, this)
+      } catch (error) {
+        this.status = 'reject'
+      }
+      
+    }
+    resolve (obj) {
+      console.log(this);
+      
+      if(this.status === 'pending') {
+        this.status = 'resolve'
+        this.resolveList.forEach(v=>{
+          v(obj)
+        })
+      }
+    }
+    then (fn) {
+      this.resolveList.push(fn)
+    }
+  }
+
+  new myPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(8);
+  }, 2000);
+})
+  .then(res => {
+    console.log(res);
+  })
+// 看了后在写 。。。
+  class myPromise2 {
+    constructor (fn) {
+      this.resolveList = []
+      this.rejectList = []
+      this.state = 'pending'
+      const resolve = (...args)=>{
+        setTimeout(() => {
+          console.log('x2');
+          console.log(this.resolveList);
+          
+          
+            if (this.state === 'pending') {
+            this.state = 'resolve'
+            this.resolveList.forEach(v=>{
+              v(args)
+            })
+          }
+        }, 0);
+      }
+      fn(resolve)
+    }
+    then (fn) {
+      console.log('x1');
+      
+      this.resolveList.push(fn)
+    }
+  }
+  new myPromise2((resolve, reject) => {
+  setTimeout(() => {
+    resolve(9);
+  }, 2000);
+})
+  .then(res => {
+    console.log(res);
+  })
+</script>
 </html>

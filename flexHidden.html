@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Flex下Text Hidden</title>
+  <style>
+    .parent {
+      display: flex;
+    }
+
+    .children {
+      flex: 1;
+      /*min-width: 0;*/
+    }
+
+    .text-deal {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .left {
+      width: 200px;
+      flex-shrink: 0;
+      background: #ccc;
+    }
+
+    .middle {
+      flex: auto;
+      background: gold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .right {
+      width: 200px;
+      flex-shrink: 0;
+      background: gray
+    }
+  </style>
+  <style >
+
+.detail-item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 20px;
+    background: #fff;
+
+    
+  }
+    .detail-item-label {
+      display: flex;
+      flex-wrap: wrap;
+      padding-top: 15px;
+    }
+  .detail-item-text {
+      line-height: 19px;
+      opacity: 1;
+      font-size: 14px;
+      font-family: Microsoft YaHei;
+      font-weight: Regular;
+      color: rgba(99,105,118,1);
+      letter-spacing: 0px;
+    }
+  .list-null {
+    text-align: center;
+    color: #999;
+    padding: 30px 0;
+  }
+  .evaluate-detail-new {
+    display: flex;
+    padding:32px 30px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+  }
+  .evaluate-detail_right {
+    max-width: 200px;
+    padding-top: 3px;
+    
+  }
+
+      .evaluate-detail_mid{
+        flex: auto;
+        
+      }
+      .evaluate-detail_left{
+        width: 48px;
+        text-align: center;
+        margin-right: 20px;
+    
+    font-size: 14px;
+    
+    color: rgba(72,78,99,1);
+    
+      }
+      .evaluate-detail_mid_start {
+        display: flex;
+    align-items: center;
+    
+    
+    font-size: 14px;
+    color: rgba(99,105,118,1);
+      }
+      .evaluate-detail_mid_content {
+        margin: 14px 0 21px 0;
+        color: #7B8290;
+        width: 700px;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap; 
+    min-height: 13px;
+    
+      }
+      .evaluate-detail_mid_time {
+    
+    font-size: 12px;
+    
+    color: rgba(192,196,204,1);
+      }
+      .evaluate_label {
+    border: 1px solid;
+    border-radius: 4px;
+    color: #FF8955;
+    padding: 6px 5px;
+    font-size: 12px;
+    display: inline-block;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    float: right;
+      }
+
+    </style>
+</head>
+
+<body>
+  <div class="parent">
+    <div class="left">
+      left
+    </div>
+    <!-- <div class="children">
+        <p class="text-deal">
+            这是一个有效果的文字超出用省略号代替的例子，你看可以吗？
+        </p>
+    </div> -->
+    <div class="middle">
+      这是一个有效果的文字超出用省略号代替的例子，你看可以吗？
+    </div>
+    <div class="right">
+      right
+    </div>
+  </div>
+  <div class="evaluate-detail_mid">
+    <p class="evaluate-detail_mid_start">
+      评价星级: 123132
+    </p>
+    <p  class="evaluate-detail_mid_content">{{item.remark}}</p>
+    <p class="evaluate-detail_mid_time">
+      <span>
+        评价时间：{{item.createTime}}
+      </span>
+      <span style="margin-left:20px;">
+        评价账期：{{item.evalPeriod}}
+      </span>
+    </p>
+    <div class="evaluate-detail_right">
+        <span class="evaluate_label">{{val}}</span>
+    </div>
+  </div>
+</body>
+
+</html>
