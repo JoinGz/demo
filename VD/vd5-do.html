@@ -19,6 +19,8 @@
   let test = document.querySelector('#test')
   let arr2 = [1]
   let arr3 = [3,2,1]
+  // 等待渲染的组件数组
+  let pendingRenderComponents = []
   class Component {
     constructor (props) {
       this.props = props
@@ -29,14 +31,37 @@
         ...this.state,
         ...state
       }
-      const vdom = this.render()
-      diff(this.dom, vdom, this.parent)
+      // const vdom = this.render()
+      // 渲染队列
+      enqueueRender(this)
+      // diff(this.dom, vdom, this.parent)
     }
     render () {
       throw new Error('没有render方法')
     }
   }
-
+  function enqueueRender(components) {
+    if(pendingRenderComponents.push(components) == 1) {
+      // 没有Promise的兼容一下
+      if (typeof Promise === 'function') {
+        Promise.resolve().then(renderComponent)
+      }else {
+        setTimeout(renderComponent, 0);
+      }
+    }
+  }
+  function renderComponent () {
+    // 组件去重
+    let renderList = [...new Set(pendingRenderComponents)]
+    console.log(renderList);
+    
+    renderList.forEach(v=>{
+      let vdom = v.render()
+      diff(v.dom,vdom,v.parent)
+    })
+    // 处理完成清空待渲染列表
+    pendingRenderComponents = []
+  }
   class Mycom extends Component {
     constructor(props) {
       super(props)
@@ -44,6 +69,8 @@
     }
     elmClick () {
       this.setState({code: 777})
+      this.setState({code: 789})
+
     }
     render() {
       return (
