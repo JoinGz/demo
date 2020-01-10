@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  class Line{
+    constructor (fn) {
+      this.fn = fn
+      this.next = null
+    }
+    setNext(fn) {
+      this.next = fn
+    }
+    run () {
+      let result = this.fn.apply(this, arguments)
+      if (result === 'next') {
+        // 注意是下次调用的函数调用this.next,不然造成死循环。且是下个对象的run方法。
+        return this.next && this.next.run.apply(/* 注意 */this.next, arguments)
+      }
+      return result
+    }
+  }
+  let than100 = new Line(function (a) {
+    if(a > 100) {
+      console.log('100-向下传递')
+      return 'next'
+    }
+    console.log('不大于100,链条终止');
+  })
+  let than200 = new Line(function (a) {
+    if(a > 200) {
+      console.log('200-向下传递')
+      return 'next'
+    }
+    console.log('不大于200,链条终止');
+  })
+  let than300 = new Line(function (a) {
+    if(a > 300) {
+      console.log('300-向下传递')
+      return 'next'
+    }
+    console.log('不大于300,链条终止');
+  })
+  than100.setNext(than200)
+  than200.setNext(than300)
+  than100.run(100.1)
+</script>
+</html>
