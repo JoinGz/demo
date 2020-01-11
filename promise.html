@@ -29,6 +29,7 @@
         if (value instanceof Promise) {
           return value.then(resolve, reject);
         }
+        // console.log(this.id);
         setTimeout(() => {
           if (this.state === PENDING) {
             this.state = FULFILLED;
@@ -216,16 +217,20 @@
 
   new AjPromise((resolve, reject) => {
     setTimeout(() => {
-      resolve(2);
+      resolve('a');
     }, 200);
   })
     .then(res => {
       console.log(res);
       return new AjPromise((r, j) => {
         setTimeout(() => {
-          r(3)
+          r('b')
         }, 100)
       })
+      .then(f=>{
+          console.log(f)
+          return '{'
+        })
     })
     .then(res => {
       console.log(res);
@@ -234,16 +239,19 @@
 
   // new Promise((resolve, reject) => {
   //   setTimeout(() => {
-  //     resolve(2 + 'p');
+  //     resolve('a');
   //   }, 200);
   // })
   //   .then(res => {
   //     console.log(res);
   //     return new Promise((r, j) => {
   //       setTimeout(() => {
-  //         r(3 + 'p')
+  //         r('b')
   //       }, 100)
-  //     })
+  //     }).then(f=>{
+  //         console.log(f)
+  //         return '{'
+  //       })
   //   })
   //   .then(res => {
   //     console.log(res);

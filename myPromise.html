@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  const PENDING = 'pending';
+  const FULFILLED = 'fulfilled';
+  const REJECTED = 'rejected';
+  let id = 1
+  class GZPromise {
+    constructor(fn) {
+      this.value = null;
+      this.reason = null;
+      this.state = PENDING
+      this.successList = []
+      this.failList = []
+      this.id = id++
+      const resolve = (value) => {
+        setTimeout(() => {
+          console.log(this.id);
+          
+          if (this.state === PENDING) {
+            this.value = value
+            this.state = FULFILLED
+            // 后面支持all 这里要改
+            this.successList.forEach(v => {
+              v(this.value)
+            })
+          }
+        })
+      }
+      const reject = (value) => {
+        setTimeout(() => {
+          if (this.state === PENDING) {
+            this.reason = value
+            this.state = REJECTED
+            this.failList.forEach(v => {
+              v(this.reason)
+            })
+          }
+        })
+      }
+      try {
+        fn(resolve, reject)
+      } catch (error) {
+        reject(error)
+      }
+    }
+    then(success, fail) {
+      let newPromise
+      if (this.state === PENDING) {
+        return newPromise = new GZPromise((r, j) => {
+          // this.successList.push(success) 不直接增加success,需要包一层对返回值和新建的promise做处理
+          this.successList.push(value => {
+            try {
+              let returnValue = success(value)
+              resolveHandler(newPromise, returnValue, r, j)
+            } catch (error) {
+              j(error)
+            }
+          })
+        })
+      }
+
+    }
+  }
+  function resolveHandler(newPromise, returnValue, r, j) {
+    if (newPromise === returnValue) {
+      j(new TypeError('循环引用'))
+    }
+    if (returnValue instanceof GZPromise) {
+      if (returnValue.state === PENDING) {
+        returnValue.then(y => { resolveHandler(newPromise, y, r, j) }, fail => { j(fail) })
+      } else {
+        returnValue.then(r, j)
+      }
+    } else {
+      r(returnValue)
+    }
+  }
+  new GZPromise((r) => {
+    setTimeout(() => {
+      r('2s')
+    }, 200);
+  }).then((d) => {
+    // console.log(d)
+    return new GZPromise((r) => {
+      setTimeout(() => {
+        r(1)
+      }, 17)
+    }).then(r=>{
+      return 'e'
+    })
+  })
+  .then(d => {
+    // console.log(d);
+  })
+</script>
+
+</html>
