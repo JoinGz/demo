@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
   // a = [1, 2, 3]
   // a.join = a.shift
   // console.log(a == 1 && a == 2 && a == 3)
@@ -111,7 +111,7 @@ var fn = new Fn();
 //通过getPrototypeOf静态方法，获得对象fn的prototype
 var proto = Object.getPrototypeOf(fn);
 console.log(proto === Fn)
-</script>
+</script> -->
 <script>
   Function.prototype.bind2 = function () {
     let that = this
@@ -121,6 +121,13 @@ console.log(proto === Fn)
     fn.prototype = this.prototype
     function B() {
       // return that.apply(firstArg, ([]).concat.apply(args,([]).slice.call(arguments)))
+      console.log(this instanceof fn);
+      if (this instanceof fn){
+console.log(this);
+console.log(fn);
+
+
+      }
       return that.apply(this instanceof fn ? this : firstArg, ([]).concat.apply(args,([]).slice.call(arguments)))
     }
     B.prototype = new fn()
@@ -139,6 +146,8 @@ console.log(proto === Fn)
   var bbb = logA.bind2(new y()) // new y() 就是logA
   bbb()
   // 原生
+  console.log('原生');
+  
   let y1 = logA.bind(abc)
   y1()
   var bbb1 = logA.bind(new y())

@@ -324,7 +324,7 @@
   }
 
   function drawArc(x, y, radius) {
-    ctx.save();
+    // ctx.save();
     // 提笔；起始一条路径，或重置当前路径
     ctx.beginPath();
     // 定义路径
@@ -336,7 +336,7 @@
     if (clear) {
       // ctx.clip();
       // ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.restore();
+      // ctx.restore();
     }
   }
   canvas.onmousemove = (e) => {

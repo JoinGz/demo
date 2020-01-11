@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Once</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  let proxy = function () {
+    let arr = [];
+
+    function add(fn) {
+      this.arr.push(fn)
+    }
+
+    function run(x) {
+      this.arr.forEach(v => {
+        v(x)
+      });
+      this.arr = []
+    }
+    return {
+      add,
+      run,
+      arr
+    }
+  }
+  let myProxy = proxy()
+  let async1 = (x) => {
+    setTimeout(() => {
+      console.log('拉取数据');
+      myProxy.run(x)
+      once = true
+    }, 500);
+  }
+  let once = true
+
+  function getData(fn) {
+    myProxy.add(fn)
+    if (once) {
+      once = false
+      async1('666')
+    }
+  }
+  getData(function (x) {
+    console.log(x + '1');
+  })
+  getData(function (x) {
+    console.log(x + '2');
+  })
+  setTimeout(() => {
+    getData(function (x) {
+      console.log(x + '1');
+    })
+  }, 1000);
+  // 同时依赖一样的数据返回时;执行getData,在取数据中进入的,把需要的回调放入myProxy.只请求一次，执行每次回调
+</script>
+
+</html>

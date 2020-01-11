@@ -1,171 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
 </head>
+
 <body>
-  
+
 </body>
+
 <script>
-  //Promise 的三种状态  (满足要求 -> Promise的状态)
-const PENDING = 'pending';
-const FULFILLED = 'fulfilled';
-const REJECTED = 'rejected';
-
-class AjPromise {
-  constructor(fn) {
-    //当前状态
-    this.state = PENDING;
-    //终值
-    this.value = null;
-    //拒因
-    this.reason = null;
-    //成功态回调队列
-    this.onFulfilledCallbacks = [];
-    //拒绝态回调队列
-    this.onRejectedCallbacks = [];
-
-    //成功态回调
-    const resolve = value => {
-      // 使用macro-task机制(setTimeout),确保onFulfilled异步执行,且在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。
-      setTimeout(() => {
-        if (this.state === PENDING) {
-          // pending(等待态)迁移至 fulfilled(执行态),保证调用次数不超过一次。
-          this.state = FULFILLED;
-          // 终值
-          this.value = value;
-          this.onFulfilledCallbacks.map(cb => {
-            this.value = cb(this.value);
-          });
+  const PENDING = 'pending';
+  const FULFILLED = 'fulfilled';
+  const REJECTED = 'rejected';
+  let id = 1
+  class AjPromise {
+    constructor(fn) {
+      this.state = PENDING;
+      this.value = null;
+      this.reason = null;
+      this.onFulfilledCallbacks = [];
+      this.onRejectedCallbacks = [];
+      this.id = id++
+      const resolve = value => {
+        if (value instanceof Promise) {
+          return value.then(resolve, reject);
         }
-      });
-    };
-    //拒绝态回调
-    const reject = reason => {
-      // 使用macro-task机制(setTimeout),确保onRejected异步执行,且在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。 (满足要求 -> 调用时机)
-      setTimeout(() => {
-        if (this.state === PENDING) {
-          // pending(等待态)迁移至 fulfilled(拒绝态),保证调用次数不超过一次。
-          this.state = REJECTED;
-          //拒因
-          this.reason = reason;
-          this.onRejectedCallbacks.map(cb => {
-            this.reason = cb(this.reason);
+        setTimeout(() => {
+          if (this.state === PENDING) {
+            this.state = FULFILLED;
+            this.value = value;
+            console.log(this.id);
+            
+            this.onFulfilledCallbacks.map(cb => {
+              cb = cb(this.value);
+            });
+          }
+        });
+      };
+      const reject = reason => {
+        setTimeout(() => {
+          if (this.state === PENDING) {
+            this.state = REJECTED;
+            this.reason = reason;
+            this.onRejectedCallbacks.map(cb => {
+              cb = cb(this.reason);
+            });
+          }
+        });
+      };
+      try {
+        fn(resolve, reject);
+      } catch (e) {
+        reject(e);
+      }
+    }
+    then(onFulfilled, onRejected) {
+      let newPromise;
+
+      onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value;
+      onRejected =
+        typeof onRejected === 'function'
+          ? onRejected
+          : reason => {
+            throw reason;
+          };
+      if (this.state === FULFILLED) {
+        return (newPromise = new AjPromise((resolve, reject) => {
+          setTimeout(() => {
+            try {
+              let x = onFulfilled(this.value);
+              resolvePromise(newPromise, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
           });
-        }
-      });
-    };
-    try {
-      //执行promise
-      fn(resolve, reject);
-    } catch (e) {
-      reject(e);
+        }));
+      }
+      if (this.state === REJECTED) {
+        return (newPromise = new AjPromise((resolve, reject) => {
+          setTimeout(() => {
+            try {
+              let x = onRejected(this.reason);
+              resolvePromise(newPromise, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          });
+        }));
+      }
+      if (this.state === PENDING) {
+        return (newPromise = new AjPromise((resolve, reject) => {
+          // 返回的一个新的promise回调放在这次的对象中，不然没法回调。
+          this.onFulfilledCallbacks.push(value => {
+            try {
+              // 执行父级的promise
+              let x = onFulfilled(value);
+              // resolve 新生成的对象
+              resolvePromise(newPromise, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          });
+          this.onRejectedCallbacks.push(reason => {
+            try {
+              let x = onRejected(reason);
+              resolvePromise(newPromise, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          });
+        }));
+      }
+    }
+    catch(onRejected) {
+      return this.then(null, onRejected);
     }
   }
-  then(onFulfilled, onRejected) {
-    console.log('zhixing');
-    
-    typeof onFulfilled === 'function' && this.onFulfilledCallbacks.push(onFulfilled);
-    typeof onRejected === 'function' && this.onRejectedCallbacks.push(onRejected);
-    // 返回this支持then 方法可以被同一个 promise 调用多次
-    return this;
+  function resolvePromise(promise2, x, resolve, reject) {
+    if (x === promise2) {
+      reject(new TypeError('循环引用'));
+    }
+    if (x instanceof AjPromise) {
+      if (x.state === PENDING) {
+        x.then(
+          y => {
+            resolvePromise(promise2, y, resolve, reject);
+          },
+          reason => {
+            reject(reason);
+          }
+        );
+      } else {
+        x.then(resolve, reject);
+      }
+    } else if (x && (typeof x === 'function' || typeof x === 'object')) {
+      let called = false;
+      try {
+        let then = x.then;
+        if (typeof then === 'function') {
+          then.call(
+            x,
+            y => {
+              if (called) return;
+              called = true;
+              resolvePromise(promise2, y, resolve, reject);
+            },
+            r => {
+              if (called) return;
+              called = true;
+              reject(r);
+            }
+          );
+        } else {
+          resolve(x);
+        }
+      } catch (e) {
+        if (called) return;
+        called = true;
+        reject(e);
+      }
+    } else {
+      resolve(x);
+    }
   }
-}
 
-new AjPromise((resolve, reject) => {
-  setTimeout(() => {
-    resolve(2);
-  }, 2000);
-})
-  .then(res => {
-    console.log(res);
-    return res + 1;
+  AjPromise.all = function (promises) {
+    return new AjPromise((resolve, reject) => {
+      let done = gen(promises.length, resolve);
+      promises.forEach((promise, index) => {
+        promise.then(value => {
+          done(index, value);
+        }, reject);
+      });
+    });
+  };
+
+  function gen(length, resolve) {
+    let count = 0;
+    let values = [];
+    return function (i, value) {
+      values[i] = value;
+      if (++count === length) {
+        resolve(values);
+      }
+    };
+  }
+
+  AjPromise.race = function (promises) {
+    return new AjPromise((resolve, reject) => {
+      for (var i = 0; i < promises.length; i++) {
+        promises[i].then(resolve, reject);
+      }
+    });
+  };
+  AjPromise.resolve = function (value) {
+    return new AjPromise((resolve, reject) => resolve(value));
+  };
+  AjPromise.reject = function (reason) {
+    return new AjPromise((resolve, reject) => reject(reason));
+  };
+
+  AjPromise.deferred = function () {
+    let defer = {};
+    defer.promise = new AjPromise((resolve, reject) => {
+      defer.resolve = resolve;
+      defer.reject = reject;
+    });
+    return defer;
+  };
+
+
+  new AjPromise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(2);
+    }, 200);
   })
-  .then(res => {
-    console.log(res);
-  });
+    .then(res => {
+      console.log(res);
+      return new AjPromise((r, j) => {
+        setTimeout(() => {
+          r(3)
+        }, 100)
+      })
+    })
+    .then(res => {
+      console.log(res);
+    });
+
+
+  // new Promise((resolve, reject) => {
+  //   setTimeout(() => {
+  //     resolve(2 + 'p');
+  //   }, 200);
+  // })
+  //   .then(res => {
+  //     console.log(res);
+  //     return new Promise((r, j) => {
+  //       setTimeout(() => {
+  //         r(3 + 'p')
+  //       }, 100)
+  //     })
+  //   })
+  //   .then(res => {
+  //     console.log(res);
+  //   });
+
 
 </script>
+<!-- <script>
+  const pending = 'pending';
+  const fulfilled = "fulfilled"
+  const reject = 'rejected';
 
-<script>
-  // 两个月后自己在写的版本
-  class myPromise {
-    constructor (fn) {
-      this.List = []
-      this.List.push(fn)
-      this.status = ''
-      this.resolveList = []
-      try {
-        this.status = 'pending'
-        this.List.forEach(v=>{
-          v(this.resolve.bind(this))
-        }, this)
-      } catch (error) {
-        this.status = 'reject'
-      }
-      
-    }
-    resolve (obj) {
-      console.log(this);
-      
-      if(this.status === 'pending') {
-        this.status = 'resolve'
-        this.resolveList.forEach(v=>{
-          v(obj)
-        })
-      }
-    }
-    then (fn) {
-      this.resolveList.push(fn)
-    }
-  }
-
-  new myPromise((resolve, reject) => {
-  setTimeout(() => {
-    resolve(8);
-  }, 2000);
-})
-  .then(res => {
-    console.log(res);
-  })
-// 看了后在写 。。。
-  class myPromise2 {
-    constructor (fn) {
-      this.resolveList = []
-      this.rejectList = []
-      this.state = 'pending'
-      const resolve = (...args)=>{
+  class MyP {
+    constructor(fn) {
+      this.successList = []
+      this.failList = []
+      this.status = pending
+      const resolve = (value) => {
         setTimeout(() => {
-          console.log('x2');
-          console.log(this.resolveList);
-          
-          
-            if (this.state === 'pending') {
-            this.state = 'resolve'
-            this.resolveList.forEach(v=>{
-              v(args)
-            })
+          if (this.status === pending) {
+            this.status = fulfilled
+            this.successList.forEach(v => {
+              v(value)
+            });
           }
         }, 0);
       }
-      fn(resolve)
+      const reject = (value) => {
+        setTimeout(() => {
+          if(this.status === pending) {
+            this.status = reject
+            this.failList.forEach(v => {
+              v(value)
+            });
+          }
+        });
+      }
+      try {
+        fn(resolve, reject)
+      } catch (error) {
+        reject(error)
+      }
     }
-    then (fn) {
-      console.log('x1');
-      
-      this.resolveList.push(fn)
+    then(fn) {
+      this.successList.push(fn)
+      this.failList.push(fn)
+      let newPromise = new Myp((r,j)=>{
+
+      })
+      return newPromise
     }
+
   }
-  new myPromise2((resolve, reject) => {
-  setTimeout(() => {
-    resolve(9);
-  }, 2000);
-})
-  .then(res => {
+  new MyP((r,j) => {
+    throw new Error('//')
+    setTimeout(() => {
+      j('1s')
+    }, 1000);
+  }).then((res) => {
+    console.log('ll');
+    
     console.log(res);
   })
 </script>
+<script>
+  //Promise 的三种状态  (满足要求 -> Promise的状态)
+  const PENDING = 'pending';
+  const FULFILLED = 'fulfilled';
+  const REJECTED = 'rejected';
+
+  class AjPromise {
+    constructor(fn) {
+      //当前状态
+      this.state = PENDING;
+      //终值
+      this.value = null;
+      //拒因
+      this.reason = null;
+      //成功态回调队列
+      this.onFulfilledCallbacks = [];
+      //拒绝态回调队列
+      this.onRejectedCallbacks = [];
+
+      //成功态回调
+      const resolve = value => {
+        // 使用macro-task机制(setTimeout),确保onFulfilled异步执行,且在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。
+        setTimeout(() => {
+          if (this.state === PENDING) {
+            // pending(等待态)迁移至 fulfilled(执行态),保证调用次数不超过一次。
+            this.state = FULFILLED;
+            // 终值
+            this.value = value;
+            this.onFulfilledCallbacks.map(cb => {
+              this.value = cb(this.value);
+            });
+          }
+        });
+      };
+      //拒绝态回调
+      const reject = reason => {
+        // 使用macro-task机制(setTimeout),确保onRejected异步执行,且在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。 (满足要求 -> 调用时机)
+        setTimeout(() => {
+          if (this.state === PENDING) {
+            // pending(等待态)迁移至 fulfilled(拒绝态),保证调用次数不超过一次。
+            this.state = REJECTED;
+            //拒因
+            this.reason = reason;
+            this.onRejectedCallbacks.map(cb => {
+              this.reason = cb(this.reason);
+            });
+          }
+        });
+      };
+      try {
+        //执行promise
+        fn(resolve, reject);
+      } catch (e) {
+        reject(e);
+      }
+    }
+    then(onFulfilled, onRejected) {
+      typeof onFulfilled === 'function' && this.onFulfilledCallbacks.push(onFulfilled);
+      typeof onRejected === 'function' && this.onRejectedCallbacks.push(onRejected);
+      // 返回this支持then 方法可以被同一个 promise 调用多次
+      return this;
+    }
+  }
+</script> -->
+
 </html>
