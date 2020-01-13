@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <input type="file" id="file">
+  <div style="width: 100px;height: 100px;background: #ccc;" onclick="select()">
+
+  </div>
+</body>
+<script>
+  const SLICE_NUM = 1024; //KB
+  let selectFile;
+  let file = document.querySelector('#file')
+  file.addEventListener('change', select)
+
+  function select(e) {
+    let file = e.target.files[0]
+    Promise.all(sendFileChunk(getSliceFile(file))).then(rs=>{
+      console.log(rs)
+    })
+  }
+
+  function getSliceFile(file) {
+    selectFile = file
+    let fileSize = file.size
+    if (SLICE_NUM < fileSize) {
+      let chunkSize = (file.size / 1024 / SLICE_NUM).toFixed(0)
+      let chunkEachSize = (file.size / chunkSize).toFixed(0)
+      let ChunkList = []
+      for (let i = 1; i <= chunkSize; i++) {
+        ChunkList.push({
+          chunk: file.slice((i - 1) * chunkEachSize, i * chunkEachSize),
+          hash: file.name + i,
+        })
+      }
+      console.log(ChunkList);
+
+      return ChunkList
+    }
+  }
+
+  function ajax({
+    url,
+    headers,
+    data
+  }) {
+    return new Promise((resolve, reject) => {
+      let xhr = new XMLHttpRequest()
+      xhr.open('post', url)
+      Object.keys(headers).forEach(v => {
+        xhr.setRequestHeader(v, headers[v])
+      })
+      xhr.send(data)
+      xhr.onload = e => {
+        resolve({
+          data: e.target.response
+        })
+      }
+    })
+  }
+
+  function sendFileChunk(ChunkList) {
+    return ChunkList.map((v) => {
+      let data = new FormData()
+      data.append('chunk', v.chunk)
+      data.append('hash', v.hash)
+      data.append('filename', selectFile.name)
+      return ajax({
+        url: '/file',
+        data,
+        headers: {}
+      })
+      
+    })
+  }
+</script>
+
+</html>
