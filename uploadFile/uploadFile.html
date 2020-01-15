@@ -12,22 +12,33 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-wrap: wrap;
       height: 100vh;
+      padding:0  20vh;
+      align-content: center;
+    }
+    #file,#list{
+      width: 100%;
     }
   </style>
 </head>
 
 <body class="centerBox">
   <input type="file" id="file">
-  <form method="post" action="http://127.0.0.1:3001/upload">
+  <!-- <form method="post" action="http://127.0.0.1:3001/upload">
     <input name="name" type="file" />
     <input type="submit" value="以POST提交" />
-  </form>
+  </form> -->
+  <ul id="list">
+
+  </ul>
 </body>
 <script>
   const SLICE_NUM = 100; //KB
   let selectFile;
   let file = document.querySelector('#file')
+  let ul = document.querySelector('#list')
+  let li = document.createElement('li')
   file.addEventListener('change', select)
 
   function select(e) {
@@ -75,8 +86,9 @@
       Object.keys(headers).forEach(v => {
         xhr.setRequestHeader(v, headers[v])
       })
-      xhr.send(data)
+      // 在send之前
       xhr.upload.onprogress = onprogress
+      xhr.send(data)
       xhr.onload = e => {
         resolve({
           data: e.target.response
@@ -94,10 +106,23 @@
       return ajax({
         url: 'http://127.0.0.1:3001/upload',
         data,
-        headers: {}
+        headers: {},
+        onprogress: createProgress(v)
       })
 
     })
+  }
+  function createProgress (item) {
+    return function (e) {
+      if(item.li) {
+        item.li.innerHTML = item.hash + ' ' + (( e.loaded /  e.total ) * 100).toFixed(2) + '%'
+      } else {
+        let lic = li.cloneNode()
+        item.li = lic
+        item.li.innerHTML = item.hash + ' ' + (( e.loaded /  e.total ) * 100).toFixed(2) + '%'
+        ul.appendChild(item.li)
+      }
+    }
   }
 </script>
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  function createWorker(f) {
+    var blob = new Blob(['(' + f.toString() + ')()']);
+    var url = window.URL.createObjectURL(blob);
+    var worker = new Worker(url);
+    return worker;
+  }
+  let work = createWorker(function () {
+    // self代表子线程自身 全局变量
+    setTimeout(() => {
+      postMessage('webworker传来的数据')
+    }, 5000);
+    setTimeout(() => {
+      postMessage({
+        a: 1
+      })
+    }, 1000);
+    onmessage = function (event) {
+      console.log('来自外部的数据：' + event.data);
+      console.log(this === self); // true
+    }
+    // this.addEventListener('message', function (e) {
+    //   this.postMessage('You said: ' + e.data);
+    // }, false);
+
+  })
+  // 接收子线程数据
+  work.onmessage = function (e) {
+    console.log(e.data)
+  }
+  // 向子线程发送数据
+  work.postMessage('Hello World');
+</script>
+
+</html>

@@ -5,9 +5,19 @@ const util = require('util')
 const path = require('path')
 const upload_file_path = path.resolve(__dirname, 'target')
 const upload_file_path_finish = path.resolve(__dirname, 'finish')
+const upload_file_path_tmp = path.resolve(__dirname, 'tmp')
 
 http
   .createServer((request, response) => {
+    if(!fs.existsSync(upload_file_path)) {
+      fs.mkdirSync(upload_file_path, { recursive: true },)
+    }
+    if(!fs.existsSync(upload_file_path_finish)) {
+      fs.mkdirSync(upload_file_path_finish, { recursive: true },)
+    }
+    if(!fs.existsSync(upload_file_path_tmp)) {
+      fs.mkdirSync(upload_file_path_tmp, { recursive: true },)
+    }
     const url = request.url
     if (url === '/') {
       fs.createReadStream('./uploadFile.html').pipe(response)
