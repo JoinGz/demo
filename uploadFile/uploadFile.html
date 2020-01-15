@@ -6,24 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
+  <style>
+    .centerBox {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
 </head>
 
-<body>
+<body class="centerBox">
   <input type="file" id="file">
-  <div style="width: 100px;height: 100px;background: #ccc;" onclick="select()">
-
-  </div>
+  <form method="post" action="http://127.0.0.1:3001/upload">
+    <input name="name" type="file" />
+    <input type="submit" value="以POST提交" />
+  </form>
 </body>
 <script>
-  const SLICE_NUM = 1024; //KB
+  const SLICE_NUM = 100; //KB
   let selectFile;
   let file = document.querySelector('#file')
   file.addEventListener('change', select)
 
   function select(e) {
     let file = e.target.files[0]
-    Promise.all(sendFileChunk(getSliceFile(file))).then(rs=>{
-      console.log(rs)
+    Promise.all(sendFileChunk(getSliceFile(file))).then(rs => {
+      ajax({
+        url: 'http://127.0.0.1:3001/merge', data: JSON.stringify({
+          'filename': selectFile.name
+        }),
+        headers: {
+          "content-type": "application/json"
+        }
+      })
     })
   }
 
@@ -48,8 +65,9 @@
 
   function ajax({
     url,
-    headers,
-    data
+    headers = {},
+    data,
+    onprogress = e => e
   }) {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest()
@@ -58,6 +76,7 @@
         xhr.setRequestHeader(v, headers[v])
       })
       xhr.send(data)
+      xhr.upload.onprogress = onprogress
       xhr.onload = e => {
         resolve({
           data: e.target.response
@@ -73,11 +92,11 @@
       data.append('hash', v.hash)
       data.append('filename', selectFile.name)
       return ajax({
-        url: '/file',
+        url: 'http://127.0.0.1:3001/upload',
         data,
         headers: {}
       })
-      
+
     })
   }
 </script>

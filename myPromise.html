@@ -58,11 +58,15 @@
     then(success, fail) {
       let newPromise
       if (this.state === PENDING) {
+        // 需要return才正确的在多级嵌套里面返回最后一个then的promise
         return newPromise = new GZPromise((r, j) => {
           // this.successList.push(success) 不直接增加success,需要包一层对返回值和新建的promise做处理
           this.successList.push(value => {
             try {
+              // 再次执行then传入的方法。
               let returnValue = success(value)
+              // 触发回调，发布事件。
+              // 如果返回的promise则还不是回调需要等到promise完成在回调
               resolveHandler(newPromise, returnValue, r, j)
             } catch (error) {
               j(error)
@@ -74,11 +78,13 @@
     }
   }
   function resolveHandler(newPromise, returnValue, r, j) {
+    // r,j 当前promise的完成触发
     if (newPromise === returnValue) {
       j(new TypeError('循环引用'))
     }
     if (returnValue instanceof GZPromise) {
       if (returnValue.state === PENDING) {
+        // 如果是promise就要在本次完成后在触发父级的完成事件
         returnValue.then(y => { resolveHandler(newPromise, y, r, j) }, fail => { j(fail) })
       } else {
         returnValue.then(r, j)

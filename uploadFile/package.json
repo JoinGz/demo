@@ -1,0 +1,18 @@
+{
+  "name": "uploadfile",
+  "version": "1.0.0",
+  "description": "uploadBigFile",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "gz"
+  ],
+  "author": "gz",
+  "license": "ISC",
+  "dependencies": {
+    "multiparty": "^4.2.1"
+  }
+}

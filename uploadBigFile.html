@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .centerBox {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body class="centerBox">
+  <input onclick="click1()" id="file" type="file" value="点击上传">
+</body>
+<script>
+  let file = document.querySelector('#file')
+  function click1() {
+    var e = e || event
+    console.log(e);
+    
+  }
+</script>
+</html>
