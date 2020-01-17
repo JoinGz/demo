@@ -63,6 +63,9 @@ http
         }
         response.end()
       })
+    } else if (url === '/getmd5js') {
+      response.setHeader('Content-Type',"text/javascript");
+      fs.createReadStream('./md5.js').pipe(response)
     }
   })
   .listen(3001, () => {

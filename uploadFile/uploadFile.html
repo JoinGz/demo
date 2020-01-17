@@ -14,10 +14,12 @@
       align-items: center;
       flex-wrap: wrap;
       height: 100vh;
-      padding:0  20vh;
+      padding: 0 20vh;
       align-content: center;
     }
-    #file,#list{
+
+    #file,
+    #list {
       width: 100%;
     }
   </style>
@@ -112,17 +114,36 @@
 
     })
   }
-  function createProgress (item) {
+  function createProgress(item) {
     return function (e) {
-      if(item.li) {
-        item.li.innerHTML = item.hash + ' ' + (( e.loaded /  e.total ) * 100).toFixed(2) + '%'
+      if (item.li) {
+        item.li.innerHTML = item.hash + ' ' + ((e.loaded / e.total) * 100).toFixed(2) + '%'
       } else {
         let lic = li.cloneNode()
         item.li = lic
-        item.li.innerHTML = item.hash + ' ' + (( e.loaded /  e.total ) * 100).toFixed(2) + '%'
+        item.li.innerHTML = item.hash + ' ' + ((e.loaded / e.total) * 100).toFixed(2) + '%'
         ul.appendChild(item.li)
       }
     }
+  }
+
+  // webWorker
+  function createWorker(f) {
+    var blob = new Blob(['(' + f.toString() + ')()']);
+    var url = window.URL.createObjectURL(blob);
+    var worker = new Worker(url);
+    return worker;
+  }
+
+  function getFileHash() {
+    return new Promise((r, j) => {
+      let worker = createWorker(function () {
+        self.importScripts('http://127.0.0.1:3001/getmd5js')
+        self.onmessage = function (ChunkList) {
+          console.log(ChunkList);
+        }
+      })
+    })
   }
 </script>
 
