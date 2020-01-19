@@ -34,53 +34,63 @@
   <ul id="list">
 
   </ul>
+  <button type="button" id="cancelBtn">取消上传</button>
 </body>
 <script>
-  const SLICE_NUM = 100; //KB
+  const SLICE_NUM = 10; //KB
   let selectFile;
+  let fileHashName;
   let file = document.querySelector('#file')
   let ul = document.querySelector('#list')
   let li = document.createElement('li')
+  let cancelBtn = document.querySelector('#cancelBtn')
+  let requestList = []
+
   file.addEventListener('change', select)
 
   function select(e) {
     let file = e.target.files[0]
-    Promise.all(sendFileChunk(getSliceFile(file))).then(rs => {
-      ajax({
-        url: 'http://127.0.0.1:3001/merge', data: JSON.stringify({
-          'filename': selectFile.name
-        }),
-        headers: {
-          "content-type": "application/json"
-        }
-      })
-    })
+    if (!file) {
+      return
+    }
+    getSliceFile(file)
   }
 
-  function getSliceFile(file) {
+  async function getSliceFile(file) {
     selectFile = file
     let fileSize = file.size
+    let ChunkList = []
     if (SLICE_NUM < fileSize) {
       let chunkSize = (file.size / 1024 / SLICE_NUM).toFixed(0)
       let chunkEachSize = (file.size / chunkSize).toFixed(0)
-      let ChunkList = []
       for (let i = 1; i <= chunkSize; i++) {
         ChunkList.push({
           chunk: file.slice((i - 1) * chunkEachSize, i * chunkEachSize),
-          hash: file.name + i,
         })
       }
-      console.log(ChunkList);
-
-      return ChunkList
+    } else {
+      ChunkList.push({
+        chunk: file.slice(0, file.length),
+      })
     }
+    try {
+      fileHashName = await getFileHash(ChunkList)
+      console.log('fileHashName' + '\n' + fileHashName);
+    } catch (error) {
+      console.log('获取fileHash翻车')
+      console.log(error)
+    }
+    ChunkList.forEach((v, i) => { v.hash = fileHashName + '--hash--' + i })
+    console.log(ChunkList);
+    sendFileChunk(ChunkList)
   }
 
   function ajax({
     url,
     headers = {},
     data,
-    onprogress = e => e
+    onprogress = e => e,
+    requestList
   }) {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest()
@@ -92,28 +102,86 @@
       xhr.upload.onprogress = onprogress
       xhr.send(data)
       xhr.onload = e => {
+        if (requestList) {
+          let index = requestList.findIndex(item => item === xhr)
+          requestList.splice(index, 1)
+        }
         resolve({
           data: e.target.response
         })
       }
+      if (requestList) {
+        requestList.push(xhr)
+      }
     })
   }
 
-  function sendFileChunk(ChunkList) {
-    return ChunkList.map((v) => {
+  async function sendFileChunk(ChunkList) {
+
+    let result = await checkFileIsExist()
+    result = JSON.parse(result.data)
+    if (result.code === 1) {
+      ul.innerHTML = `${selectFile.name}已上传(秒传)`
+      return
+    }
+    let uploadedResult = await getuploadedList()
+    uploadedResult = JSON.parse(uploadedResult.data).result
+    console.log(uploadedResult)
+
+    let ajaxArr = ChunkList.filter(({hash}) => !uploadedResult.includes(hash)).map((v, i) => {
       let data = new FormData()
       data.append('chunk', v.chunk)
       data.append('hash', v.hash)
       data.append('filename', selectFile.name)
+      data.append('fileHashName', fileHashName)
+
       return ajax({
         url: 'http://127.0.0.1:3001/upload',
         data,
         headers: {},
-        onprogress: createProgress(v)
+        onprogress: createProgress(v),
+        requestList
       })
-
+    })
+    await Promise.all(ajaxArr)
+    await mergeFile()
+  }
+  function mergeFile() {
+    return ajax({
+      url: 'http://127.0.0.1:3001/merge', data: JSON.stringify({
+        'fileHashName': fileHashName,
+        'filename': selectFile.name,
+      }),
+      headers: {
+        "content-type": "application/json"
+      }
     })
   }
+
+  function checkFileIsExist() {
+    return ajax({
+      url: 'http://127.0.0.1:3001/isExist', data: JSON.stringify({
+        'fileHashName': fileHashName,
+        'filename': selectFile.name,
+      }),
+      headers: {
+        "content-type": "application/json"
+      }
+    })
+  }
+
+  function getuploadedList() {
+    return ajax({
+      url: 'http://127.0.0.1:3001/getuploadedList', data: JSON.stringify({
+        'fileHashName': fileHashName,
+        'filename': selectFile.name,
+      }),
+      headers: {
+        "content-type": "application/json"
+      }
+    })
+  }
+
   function createProgress(item) {
     return function (e) {
       if (item.li) {
@@ -135,15 +203,44 @@
     return worker;
   }
 
-  function getFileHash() {
+  function getFileHash(ChunkList) {
     return new Promise((r, j) => {
       let worker = createWorker(function () {
         self.importScripts('http://127.0.0.1:3001/getmd5js')
-        self.onmessage = function (ChunkList) {
+        const spark = new self.SparkMD5.ArrayBuffer()
+        let currentChunk = 0
+        self.onmessage = function ({ data: ChunkList }) {
           console.log(ChunkList);
+          const fileReader = new FileReader()
+          readChunk(fileReader, ChunkList)
+        }
+        function readChunk(fileReader, ChunkList) {
+          fileReader.readAsArrayBuffer(ChunkList[currentChunk].chunk)
+          fileReader.onload = function (e) {
+            spark.append(e.target.result)
+            self.postMessage({ progress: currentChunk / ChunkList.length * 100 + '%', data: 'hashing' })
+            currentChunk++
+            if (currentChunk < ChunkList.length) {
+              readChunk(fileReader, ChunkList);
+            } else {
+              self.postMessage({ fileHashName: spark.end(), data: 'finish' })
+            }
+          }
         }
       })
+      worker.postMessage(ChunkList)
+      worker.onmessage = function ({ data }) {
+        if (data.data === 'finish') {
+          r(data.fileHashName)
+        } else {
+          console.log(`getFileHashName当前进度${data.progress}`);
+        }
+      }
     })
+  }
+  cancelBtn.onclick = function () {
+    requestList.forEach(v => v.abort())
+    requestList = []
   }
 </script>
 
