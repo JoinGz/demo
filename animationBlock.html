@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #div {
+      width: 200px;
+      height: 200px;
+      background: #cccccc;
+      display: none;
+    }
+    @keyframes an {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  animation 和 display 可以共存
+  直接transform不行，需要更新渲染队列
+  <div id="div"></div>
+</body>
+<script>
+  let div = document.querySelector("#div")
+  document.body.addEventListener('click', () => {
+    div.style.display = 'block';
+    // div.style.animation = 'an 1.5s' // 可以进行动画，正常
+    //  随便看看强制更新队列
+    // div.style.transition= 'all 0.5s';
+    // console.log(div.offsetTop) // 更新后OK
+    // div.style.transform = 'translateX(50px)' // 不行，
+  })
+</script>
+
+</html>
