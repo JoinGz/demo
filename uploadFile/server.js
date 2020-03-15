@@ -112,6 +112,38 @@ http
         )
         response.end()
       })
+    } else if (url === '/uploadST' &&
+      request.method.toLowerCase() == 'options') {
+      // 处理跨域预请求
+      response.setHeader("Access-Control-Allow-Origin", "http://192.168.0.5:8080")
+      response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      response.setHeader("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS");
+      response.setHeader("Access-Control-Allow-Credentials", "true");
+      // response.setHeader("Content-Type", "application/json;charset=utf-8");
+      response.end('pass')
+    } else if (url === '/uploadST' &&
+      request.method.toLowerCase() == 'post') {
+      // 正式请求
+      response.setHeader("Access-Control-Allow-Origin", "http://192.168.0.5:8080")
+      // response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      // response.setHeader("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS");
+      response.setHeader("Access-Control-Allow-Credentials", "true");
+      const multipartEx = new multiparty.Form()
+      // 设置下临时目录
+      multipartEx.uploadDir = 'uploadST'
+      multipartEx.parse(request, async (err, fields, files) => {
+        if (err) {
+          console.log(err)
+          response.end('fail')
+          return
+        }
+        response.end('success')
+        // response.write(request.method)
+      })
+    } else if (url === '/corsTest' &&
+      request.method.toLowerCase() == 'post') {
+      response.setHeader("Content-Type", "text/plain;charset=utf-8")
+      response.end('同源不会预请求')
     } else {
       response.end('404')
     }

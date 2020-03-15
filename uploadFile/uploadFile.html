@@ -35,6 +35,11 @@
 
   </ul>
   <button type="button" id="cancelBtn">取消上传</button>
+  <!-- <form action="/uploadST" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button>提交</button>
+  </form> -->
+  <div id="ajax">ajaxTest</div>
 </body>
 <script>
   const SLICE_NUM = 10; //KB
@@ -243,5 +248,17 @@
     requestList = []
   }
 </script>
+<script>
+  let ajaxBtn = document.querySelector('#ajax')
+  ajaxBtn.addEventListener('click',function(){
+    // 测试下同源会不会发送预请求 --> 不会
+    let xhr = new XMLHttpRequest()
+    // xhr.open( 'POST','http://127.0.0.1:3001/corsTest', true) // 同源
+    xhr.open( 'POST','http://127.0.0.1:3002/', true) // cors
 
+    xhr.setRequestHeader('Content-Type','application/json')
+    xhr.send(JSON.stringify({a:1}))
+  })
+  
+</script>
 </html>
