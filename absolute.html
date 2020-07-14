@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .d1 {
+      width: 200px;
+      height: 200px;
+      background: #ccc;
+      position: relative;
+    }
+    .d2{
+      width: 200px;
+      height: 200px;
+      background: green;
+      position: absolute;
+      left: 220px;
+    }
+  </style>
+</head>
+<body>
+  <div class="d1">
+  </div>
+  <div class="d2"></div>
+</body>
+<script>
+  let d1 = document.querySelector('.d1')
+  let d2 = document.querySelector('.d2')
+  let t = null;
+  d1.addEventListener('mouseenter', function (e) {
+    console.log('进入')
+    console.log(t)
+    if(t) {
+      clearTimeout(t)
+    }
+
+  }, false)
+  d1.addEventListener('mouseleave', function (e) {
+    console.log('出去')
+    t = setTimeout(() => {
+      console.log(1)
+    }, 500);
+
+  }, false)
+  d2.addEventListener('mouseenter', function (e) {
+    console.log('进入')
+    console.log(t)
+    if(t) {
+      clearTimeout(t)
+    }
+
+  }, false)
+</script>
+</html>

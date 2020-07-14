@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas style="border: 1px solid #ccc;" width="800" height="600"></canvas>
+</body>
+<script>
+  let canvas = document.querySelector("canvas")
+  let ctx = canvas.getContext("2d")
+  ctx.beginPath()
+
+  ctx.fillStyle="#ccc"
+  ctx.fillRect(100,100,100,100)
+  ctx.closePath()
+  ctx.beginPath()
+  ctx.globalCompositeOperation="source-over";
+
+  /**
+   * source-over 默认， 新图像在已存在图像的上面
+   * source-atop 保留老图像和新图像和老图像重合的部分，新图像在上
+   * source-in 只保留新图像和老图像重合的部分  老图像透明
+   * source-out 只保留新图像和老图像没有重合的部分  老图像透明
+   * destination-over 老图在新图上面
+   * destination-atop 保留老图像和新图像和老图像重合的部分，老图像在上
+   * destination-in 在新图像中显示老图像，只有老图像的部分会被显示，新图像是透明的
+   * destination-out 在老图像中显示新图像，只有老图像的部分会被显示，新图像是透明的
+   */
+
+  ctx.fillStyle="green"
+  ctx.fillRect(150,150,100,100)
+  ctx.closePath()
+
+  canvas.addEventListener("mousedown", (e)=>{
+    ctx.globalCompositeOperation="destination-out";
+    ctx.beginPath()
+    let x = e.clientX
+    let y = e.clientY
+    ctx.moveTo(x, y)
+    canvas.addEventListener("mousemove", move)
+  })
+  function move(e) {
+      ctx.fillStyle="red"
+      let x = e.clientX
+      let y = e.clientY
+      ctx.lineTo(x, y)
+      ctx.stroke()
+      
+    }
+    canvas.addEventListener("mouseup", (e)=>{
+      ctx.closePath()
+      canvas.removeEventListener("mousemove", move)
+  })
+</script>
+</html>

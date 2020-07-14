@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      margin: auto;
+      box-shadow: 0 0 25px 1px;
+    }
+  </style>
+  <script src="./bird.js"></script>
+  <script src="./sky.js"></script>
+  <script src="./land.js"></script>
+  <script src="./pipe.js"></script>
+  <script src="./game.js"></script>
+
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="600"></canvas>
+</body>
+<script>
+  const canvas = document.querySelector("#canvas")
+  const ctx = canvas.getContext("2d")
+  function ImgLoadFn(obj, fn) {
+    let onloadEdNum = 0;
+    let allObjLength = Object.keys(obj).length;
+    let imgObj = {}
+    Object.keys(obj).forEach((key)=>{
+      const img = new Image()
+      img.src = obj[key];
+      imgObj[key] = img;
+      img.onload = function () {
+        onloadEdNum++
+        if (onloadEdNum === allObjLength) {
+          fn(imgObj)
+        }
+      }
+    })
+  }
+  // let birdImg = new Image()
+  // birdImg.src = './img/bird.png'
+  // birdImg.onload = function () {
+  //   let b = new Bird(ctx, birdImg, 3, 1, 10, 10)
+  //   // let sky = new Sky(ctx, birdImg, 3, 1, 10, 10)
+
+  //   b._bindClick()
+
+  //   // setInterval(() => {
+  //   //   b.draw()
+  //   //   b.update()
+
+  //   // }, 80);
+  //   function t() {
+  //     b.draw()
+  //     b.update()
+  //     // window.requestAnimationFrame(t)
+  //   }
+  //   t()
+  // }
+
+  ImgLoadFn({
+    bird: './img/bird.png',
+    sky: './img/sky.png',
+    land: './img/land.png',
+    pipeDown: './img/pipeDown.png',
+    pipeUp: './img/pipeUp.png',
+  }, function (params) {
+    let game = new Game(ctx, params)
+    game.addListener(()=>{
+      console.log('game over');
+    })
+    game.action()
+    // let bird = getBird(ctx, params.bird, 3, 1, 10, 10)
+    // let sky = new Sky(ctx, params.sky, 2)
+    // let sky2 = new Sky(ctx, params.sky, 2)
+    // let land = new Land(ctx, params.land, 2)
+    // let pipe = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+    // let pipe2 = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+    // let pipe3 = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+    // let pipe4 = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+    // let pipe5 = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+    // let pipe6 = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+    // let pipe7 = new Pipe(ctx, params.pipeUp, params.pipeDown, 2, 112, 2)
+
+
+
+
+
+
+
+    // bird._bindClick()
+    
+
+    // function t() {
+    //   // 先清除上一次绘制的管道路径
+    //   ctx.beginPath();
+    //   ctx.clearRect(0,0,800,600);
+
+    //   sky.draw()
+    //   sky.update()
+    //   sky2.draw()
+    //   sky2.update()
+    //   bird.draw()
+    //   bird.update()
+    //   land.draw()
+
+    //   pipe.draw()
+    // pipe2.draw()
+    // pipe3.draw()
+    // pipe4.draw()
+    // pipe.update()
+    // pipe2.update()
+    // pipe3.update()
+    // pipe4.update()
+    // pipe5.draw()
+    // pipe5.update()
+    // pipe6.draw()
+    // pipe6.update()
+    // pipe7.draw()
+    // pipe7.update()
+
+    // if (ctx.isPointInPath( bird.x + bird.oneBirdWith/2, bird.y + bird.oneBirdHeight/2 )) {
+    //   console.log('over');
+    //   console.log(bird.x +bird.oneBirdWith/2,  bird.y + bird.oneBirdHeight/2);
+    //   console.log(ctx);
+      
+      
+    // }else {
+    //   window.requestAnimationFrame(t)
+
+    // }
+    // }
+    // t()
+  })
+</script>
+
+</html>

@@ -13,30 +13,40 @@
 let mapLimit = (list, limit, asyncHandle) => {
     let recursion = (arr) => {
         return asyncHandle(arr.shift())
-            .then(()=>{
+            .then((result)=>{
               console.log('count:' + count);
-                if (arr.length!==0) return recursion(arr)   // 数组还未迭代完，递归继续进行迭代
-                else return 'finish';
+                if (arr.length!==0) {
+                    asyncResult.push(result)
+                    return recursion(arr) // 数组还未迭代完，递归继续进行迭代
+                } else {
+                    asyncResult.push(result)
+                 return asyncResult;
+
+                }
+
             })
     };
     
     let listCopy = [].concat(list);
     let asyncList = []; // 正在进行的所有并发异步操作
+    let asyncResult = []
     while(limit--) {
         asyncList.push( recursion(listCopy) ); 
     }
+    console.log(asyncList);
+    
     return Promise.all(asyncList);  // 所有并发异步操作都完成后，本次并发控制迭代完成
 }
 
-var dataLists = [1,2,3,];
+var dataLists = [1,2,3,5,0,9,8];
 var count = 0;
-mapLimit(dataLists, 2, (curItem)=>{
+mapLimit(dataLists, 3, (curItem)=>{
     return new Promise(resolve => {
         count++
         setTimeout(()=>{
             console.log(curItem, '当前并发量:', count--)
-            resolve(count);
-        }, Math.random() * 5000)  
+            resolve(curItem);
+        }, 1 * 1000)
     });
 }).then(response => {
     console.log('finish', response)

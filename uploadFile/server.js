@@ -207,3 +207,8 @@ function uploadedList({ fileHashName, filename }) {
     return []
   }
 }
+// 理解流
+// https://www.jianshu.com/p/8ada4873b445
+// https://blog.csdn.net/yolo0927/article/details/84726758
+// https://github.com/YOLO0927/multiparty-source-code-analysis/blob/master/index.js
+// http://werry.top/nodejs/2017/10/11/multiparty-sourcecode-analysis/
