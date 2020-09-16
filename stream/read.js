@@ -1,5 +1,6 @@
 // 参考文章： https://juejin.im/post/5940a9c3128fe1006a0ab176#heading-2
-
+// 流模式的转换 https://juejin.im/post/6844904078363852807#heading-13
+// https://juejin.im/post/6844903588402036750#heading-1
 // 可写流 主要是自定义write方法
 const { Writable, Readable  } = require('stream');
 const outStream = new Writable({
