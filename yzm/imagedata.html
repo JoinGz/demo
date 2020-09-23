@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <img src="http://127.0.0.1:3003" onload="imgload()" crossorigin="anonymous">
+  <canvas id="canvas" ></canvas>
+</body>
+<script>
+  let canvas = document.querySelector('#canvas')
+  let ctx = canvas.getContext('2d')
+  let img = document.querySelector('img')
+  function imgload() {
+    ctx.drawImage(img,0,0)
+
+    for (let i = 0; i < 150; i++) {
+      for (let j = 0; j < 300; j++) {
+        let imgdata = ctx.getImageData(i,j,1,1)
+        if (imgdata.data.toString() === '7,26,41,255') {
+          if(checkLeft(ctx, i, j)) {
+              if (checkDown(ctx, i, j)) {
+                console.log('移动' + (i - 4 - 4) );
+                i = 300
+                break;
+              }
+          }
+        }
+      }
+
+    }
+    for (let i = 0; i < 14; i++) {
+      let imgdata = ctx.getImageData(133 + i,40,1,1)
+      console.log(imgdata.data + '');
+      console.log(255-imgdata.data[0]);
+      
+    }
+    console.log('竖起');
+    for (let i = 0; i < 40; i++) {
+      let imgdata = ctx.getImageData(133,40 + i ,1,1)
+      console.log(imgdata.data + '');
+    }
+    
+  }
+
+  function checkLeft(ctx, i , j) {
+    let leftIs = true;
+    for (let ii = 0; ii < 14; ii++) {
+      if (!leftIs) {
+        return
+      }
+      let imgdata = ctx.getImageData(i + ii,j,1,1)
+      if (!small20(imgdata)) {
+        leftIs = false
+      }
+    }
+    return leftIs;
+  }
+
+  function small20(imgdata) {
+    return imgdata.data[0] - 7 < 20 && imgdata.data[1] - 26 < 20 && imgdata.data[2] - 41 < 20 
+  }
+
+  function checkDown(ctx, i, j) {
+    let leftIs = true;
+
+    for (let ii = 0; ii < 40; ii++) {
+      if (!leftIs) {
+        return
+      }
+      let imgdata = ctx.getImageData(i,j + ii ,1,1)
+      if (!small20(imgdata)) {
+        leftIs = false
+      }
+    }
+    return leftIs;
+  }
+</script>
+</html>

@@ -22,6 +22,9 @@ const fs = require('fs')
 router.use(function(req,res,next){
   console.log('进入中间件');
   next()
+}, function (req, res, next) {
+  console.log('进入中间件2');
+  next()
 })
 router.use('/tl', function(req,res,next){
   console.log('进入中间件--tl');

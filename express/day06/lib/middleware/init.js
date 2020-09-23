@@ -1,7 +1,7 @@
 const request = require('../req.js')
 const response = require('../res.js')
 
-expors.init = function (app) {
+exports.init = function (app) {
   return function middleware (req, res, next) {
     //request文件可能用到res对象
     req.res = res;
