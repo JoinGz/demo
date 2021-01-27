@@ -51,3 +51,60 @@ inStream2.pipe(process.stdout);
  * 我们需要在某处停止该循环，这就是为何我们放置了一个 if 语句以便在 currentCharCode 大于 90（代表 Z） 时推送一个 null 值。
  * 这段代码等价于之前的我们开始时编写的那段简单代码，但我们已改为在使用者需要时推送数据。你始终应该这样做。
  */
+
+
+/**
+  可读流分为：
+  1.暂停模式
+    先读取到highWaterMark个数据，等待用户调用read(n),n大于highWaterMark，更改highWaterMark为n,小于等于读取到
+    highWaterMark个数据返回buffer。
+  2.流动模式
+
+    实现：
+    自己调自己，不断的读取highWaterMark个数据。
+
+
+      流动模式中又有暂停状态（stream.pause()）和流动状态（stream.resume()）。
+  如果同时监听data(流动模式)、readable(暂停模式)，暂停模式会起作用，暂停模式中返回的buffer会同步到data里面。
+  但是需要留意的是，如果流存在 'readable' 事件监听器或调用了 stream.read()，则 readable.pause() 方法不起作用（流动模式才才起作用）。
+
+  模式切换
+  1.流动切换暂停模式：stream.unpipe()
+  const stream = fs.createReadStream(files["what-is-a-stream"], {
+    highWaterMark: 20
+  });
+  // 切换到流动模式
+  stream.pipe(process.stdout);
+  setTimeout(() => {
+    // 切换为暂停模式
+    stream.unpipe();
+    // 暂停模式下，读取数据
+    stream.on("readable", () => {
+      let data;
+      while (null !== (data = stream.read())) {
+        console.log("From paused mode:", data.toString());
+      }
+    });
+  }, 3);
+  2.暂停切换到流动，无法切换。只可以流动模式中，流动和暂停状态的切换
+  
+  
+ */
+
+
+/**
+  可写流
+  
+  接受数据，写入载体。如果写入的超过highWaterMark返回false,一次的写完了调用drain，表示可以再次写入。
+  
+  
+ */
+
+
+/**
+  提交代码检查
+  1.husky 功能比较多
+  2.pre-commit 就在提交前检查就可以用这个
+  
+  只检查改动的 lint-staged 参考：https://juejin.cn/post/6844904013368934407#heading-28
+ */
