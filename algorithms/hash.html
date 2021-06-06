@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function Table() {
+      this.array = new Array(5);
+      this.hashFn = function (key) {
+        let num = 0;
+        for (let i = 0; i < key.length; i++) {
+          num += key[i].charCodeAt()
+        }
+        return num % this.array.length
+      }
+
+      this.set = function (key, value) {
+        let hashKey = this.hashFn(key)
+        let index
+        if (this.array[hashKey] === undefined) {
+          this.array[hashKey] = new valueHash(key, value)
+        } else {
+          index = ++hashKey
+          let onceFirst;
+          while (this.array[index] !== undefined) {
+            if (index === this.array.length - 1 && !onceFirst) {
+              index = 0;
+              onceFirst = true;
+            }
+            index++
+          }
+          this.array[index] = new valueHash(key, value)
+        }
+
+
+      }
+      this.get = function (key) {
+        let hashKey = this.hashFn(key)
+        let index
+        if (this.array[hashKey] === undefined) {
+          return -1
+        }
+        if (this.array[hashKey].key === key) {
+          return this.array[hashKey].value
+        } else {
+          index = ++hashKey
+          let onceFirst;
+          while (this.array[index] !== undefined) {
+            if (this.array[index].key === key) {
+              return this.array[index].value
+            }
+            if (index === this.array.length - 1 && !onceFirst) {
+              index = -1; // 后面要++，为了从0继续所以-1
+              onceFirst = true;
+            }
+            index++
+          }
+
+        }
+
+      }
+      this.getAll = function () {
+        this.array.forEach(item => {
+          if (item) {
+            console.log(`${item.key} --- ${item.value}`)
+          }
+        })
+      }
+    }
+    function valueHash(key, value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    var t = new Table()
+  </script>
+</body>
+
+</html>

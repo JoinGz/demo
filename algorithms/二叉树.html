@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+
+    class Node {
+      constructor(key) {
+        this.key = key
+        this.left = null;
+        this.right = null;
+      }
+    }
+
+    class binarySearchTree {
+      constructor() {
+        this.root = null;
+      }
+      insert(key) {
+        const node = new Node(key)
+        if (this.root === null) {
+          this.root = node
+          return this;
+        }
+        this._insertNode(this.root, node)
+        return this;
+      }
+      _insertNode(aim, node) {
+        if (node.key < aim.key) {
+          if (aim.left === null) {
+            aim.left = node
+          } else {
+            this._insertNode(aim.left, node)
+          }
+        } else {
+          if (aim.right === null) {
+            aim.right = node
+          } else {
+            this._insertNode(aim.right, node)
+          }
+        }
+      }
+      min(node) {
+        node = node || this.root
+        while (node && node.left !== null) {
+          node = node.left
+        }
+        return node
+      }
+      max(node) {
+        node = node || this.root
+        while (node && node.right !== null) {
+          node = node.right
+        }
+        return node
+      }
+      print() {
+        console.log(this.root)
+      }
+      search(key, node) {
+        node = node || this.root
+        return this.searchLeft(key, node)
+      }
+      searchLeft(key, aim) {
+        if (aim === null) {
+          return false
+        }
+        if (key === aim.key) {
+          return aim;
+        }
+        if (key > aim.key) {
+          return this.searchLeft(key, aim.right)
+        } else {
+          return this.searchLeft(key, aim.left)
+        }
+      }
+      remove(key, node) {
+        node = node || this.root
+        return this._remove(key, node)
+      }
+      _remove(key, node) {
+        node = this.search(key, node)
+        if (node === null) {
+          return false
+        }
+        if (!node.left && !node.right) {
+          node = null
+          return null
+        } else if (node.right && node.left) {
+          const minRight = this.min(node.right)
+          node.key = minRight.key
+          minRight = null
+        } else {
+          node = node.left || node.right
+          return node
+        }
+      }
+
+      sortFront(node, cb) {
+        let stack = []
+        node = node || this.root
+        this._sortFront(node, cb, stack)
+      }
+      _sortFront(node, cb, stack) {
+        // 循环写法暂时无解
+        // while (node && node.key) {
+        //   cb(node)
+        //   var nodeLeft = node.left
+        //   while (nodeLeft) {
+        //     cb(nodeLeft)
+        //     nodeLeft = nodeLeft.left
+        //   }
+        //   this.sortFront(nodeLeft, cb)
+        //   var nodeRight = node.right
+        //   while (nodeRight) {
+        //     cb(nodeRight)
+        //     nodeRight = nodeRight.right
+        //   }
+        //   this.sortFront(nodeRight, cb)
+        //   node = null;
+        // }
+
+        // 递归
+        // if (node !== null) {
+        //   cb(node)
+        //   this._sortFront(node.left, cb)
+        //   this._sortFront(node.right, cb)
+        // }
+        // 循环
+        stack.push(node)
+        while (stack.length) {
+          const nowNode = stack.pop()
+          cb(nowNode)
+          // if (nowNode.left) {
+          //   stack.push(nowNode.left)
+          // } else if(nowNode.right) {
+          //   stack.push(nowNode.right)
+          // } else if (!nowNode.left && !nowNode.right) {
+          //   stack.push(nowNode)
+          // }
+          if (nowNode.right !== null) {
+            stack.push(nowNode.right)
+          }
+          if (nowNode.left !== null) {
+            stack.push(nowNode.left)
+          }
+        }
+      }
+
+      sortMid(node, cb) {
+        node = node || this.root
+        // this._sortMid(node, cb)
+        this._sortMidWithWhile(node, cb)
+
+      }
+      _sortMid(node, cb) {
+        if (node !== null) {
+          this._sortMid(node.left, cb)
+          cb(node)
+          this._sortMid(node.right, cb)
+        }
+      }
+      _sortMidWithWhile(node, cb) {
+        const stack = [];
+        while (node) {
+          if (node.left) {
+            stack.push(node)
+            node = node.left
+          } else {
+            while (stack.length && node.right === null) {
+              cb(node)
+              node = stack.pop()
+            }
+            cb(node)
+            node = node.right
+          }
+        }
+
+      }
+      sortAfter(node, cb) {
+        node = node || this.root
+        // this._sortAfter(node, cb)
+        this._sortAfterWithWhile(node, cb)
+      }
+      _sortAfter(node, cb) {
+        if (node !== null) {
+          this._sortAfter(node.left, cb)
+          this._sortAfter(node.right, cb)
+          cb(node)
+        }
+      }
+      _sortAfterWithWhile(node, cb) {
+        const stack = [];
+        let lastNode = node;
+        stack.push(node)
+        while (stack.length) {
+          const pop = stack.pop()
+          if ((pop.left ==null && pop.right == null) || (pop.left === lastNode|| pop.right === lastNode)) {
+            cb(pop)
+            lastNode = pop
+          } else {
+            stack.push(pop)
+            if (pop.right) {
+              stack.push(pop.right)
+            }
+            if (pop.left) {
+              stack.push(pop.left)
+            }
+          }
+
+        }
+
+      }
+    }
+    var t = new binarySearchTree()
+    t.insert(100)
+      .insert(90)
+      .insert(80)
+      .insert(70)
+      .insert(60)
+      .insert(75)
+      .insert(200)
+      .insert(250)
+      .insert(150)
+      .insert(300)
+      .insert(350)
+      .insert(400)
+      .insert(85)
+      .insert(95)
+
+
+  </script>
+</body>
+
+</html>

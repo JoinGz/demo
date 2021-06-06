@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    var arr = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+
+    console.time('self')
+    for (let i = 0; i < arr.length; i++) {
+      let num = arr[i];
+      for (let j = 0; j < arr.length; j++) {
+        const diffNum = arr[j];
+        if (num > diffNum) {
+          arr[i] = diffNum
+          arr[j] = num
+          num = diffNum
+        }
+      }
+    }
+    console.log(arr);
+    console.timeEnd('self')
+    var arr2 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+
+    console.time('maopao')
+    for (let i = 0; i < arr2.length - 1; i++) {
+      let hasChange;
+      for (let j = 0; j < arr2.length - i - 1; j++) {
+        const num = arr2[j];
+        if (num > arr2[j + 1]) {
+          let small = arr2[j + 1]
+          arr2[j + 1] = num;
+          arr2[j] = small;
+          hasChange = true;
+        }
+      }
+      if (!hasChange) break;
+    }
+    console.log(arr2)
+    console.timeEnd('maopao')
+
+    console.time('insert')
+    var arr3 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+    // var copyArr3 = [arr3[0]]
+    // for (let i = 1; i < arr3.length - 1; i++) {
+    //   const item = arr3[i];
+    //   for (let j = 0; j < copyArr3.length; j++) {
+    //     const element = copyArr3[j];
+    //     debugger
+    //     if (item < element) {
+    //       copyArr3.splice(j, 0, item)
+    //     } else {
+    //       copyArr3.push(element)
+    //     }
+    //     j++
+    //   }
+    // }
+    const insertionSort = array => {
+      const len = array.length;
+      if (len <= 1) return
+
+      let preIndex, current;
+      for (let i = 1; i < len; i++) {
+        preIndex = i - 1; //待比较元素的下标
+        current = array[i]; //当前元素
+        while (preIndex >= 0 && array[preIndex] > current) {
+          //前置条件之一: 待比较元素比当前元素大
+          array[preIndex + 1] = array[preIndex]; //将待比较元素后移一位
+          preIndex--; //游标前移一位
+        }
+        if (preIndex + 1 != i) {
+          //避免同一个元素赋值给自身
+          array[preIndex + 1] = current; //将当前元素插入预留空位
+          // console.log('array :', array);
+        }
+      }
+      return array;
+    };
+    console.log(insertionSort(arr3));
+
+    console.timeEnd('insert')
+
+    console.time('insert - myself')
+    var arr4 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+    for (let i = 1; i < arr4.length; i++) {
+      let j = i - 1
+      const newItem = arr4[i];
+      const preItem = arr4[j];
+      while (j >= 0 && arr4[j] > newItem) {
+        arr4[j + 1] = arr4[j]
+        j--
+      }
+      if (j + 1 != i) {
+        arr4[j + 1] = newItem
+      }
+    }
+    console.log(arr4)
+    console.timeEnd('insert - myself')
+
+
+    console.time('select - myself')
+    var arr5 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+    const arrLength = arr5.length;
+    for (let i = 0; i < arrLength; i++) {
+      let element = arr5[i];
+      let inx;
+      for (let j = i; j < arrLength; j++) {
+        if (element > arr5[j]) {
+          element = arr5[j]
+          inx = j
+        }
+      }
+      if (inx || inx == 0) {
+        arr5[inx] = arr5[i]
+        arr5[i] = element
+      }
+    }
+    console.log(arr5)
+    console.timeEnd('select - myself')
+
+
+    console.time('s-t - myself')
+    var arr6 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+    for (let i = 0; i < arr6.length; i++) {
+      let miniIndex = i;
+      for (let j = i + 1; j < arr6.length; j++) {
+        if (arr6[j] < arr6[miniIndex]) {
+          miniIndex = j
+        }
+      }
+      let temp = arr6[i]
+      arr6[i] = arr6[miniIndex]
+      arr6[miniIndex] = temp
+
+    }
+    console.log(arr6)
+    console.timeEnd('s-t - myself')
+
+    console.time('归并排序')
+    var arr7 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+    const merge = function (arr1, arr2) {
+      let mergeArr = []
+      while (arr1.length && arr2.length) {
+        if (arr1[0] <= arr2[0]) { // 怎么确定谁是最小的呢
+          mergeArr.push(arr1.shift())
+        } else {
+          mergeArr.push(arr2.shift())
+        }
+
+      }
+      while (arr1.length) {
+        mergeArr.push(arr1.shift())
+      }
+      while (arr2.length) {
+        mergeArr.push(arr2.shift())
+      }
+      return mergeArr
+    }
+
+    const mergeSort = function (arr) {
+      const allLength = arr.length
+      if (allLength < 2) {
+        return arr
+      }
+      const middle = allLength >> 1
+      const leftArr = arr.slice(0, middle)
+      const rightArr = arr.slice(middle)
+      return merge(mergeSort(leftArr), mergeSort(rightArr))
+    }
+    console.log(mergeSort(arr7))
+    console.timeEnd('归并排序')
+
+
+    console.time('快速排序')
+    var arr8 = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+    var arr8 = [3, 2, 5, 6,7]
+
+    const quickSort1 = arr => {
+      if (arr.length <= 1) {
+        return arr;
+      }
+      //取基准点
+      const midIndex = Math.floor(arr.length / 2);
+      //取基准点的值，splice(index,1) 则返回的是含有被删除的元素的数组。
+      const valArr = arr.splice(midIndex, 1);
+      const midIndexVal = valArr[0];
+      const left = []; //存放比基准点小的数组
+      const right = []; //存放比基准点大的数组
+      //遍历数组，进行判断分配
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] < midIndexVal) {
+          left.push(arr[i]); //比基准点小的放在左边数组
+        } else {
+          right.push(arr[i]); //比基准点大的放在右边数组
+        }
+      }
+      //递归执行以上操作，对左右两个数组进行操作，直到数组长度为 <= 1
+      return quickSort1(left).concat(midIndexVal, quickSort1(right));
+    };
+    console.log('quickSort1 ', quickSort1(arr8));
+    console.timeEnd('快速排序')
+  </script>
+</body>
+<script>
+  console.time('插入排序')
+  var arr = [3, 2, 1, 5, 500, 98, 12, 0, -99, -1]
+  for (let i = 0; i < arr.length; i++) {
+    // const item = arr[i];
+    let j = i;
+    const nextItem = arr[j + 1 ]
+    while (j >= 0 && arr[j] > nextItem) {
+      arr[j +1] = arr[j]
+      j--
+    }
+
+    if (j != i) {
+      arr[j + 1] = nextItem
+    }
+  }
+console.log(arr);
+
+  console.timeEnd('插入排序')
+
+</script>
+</html>
