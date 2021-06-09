@@ -202,7 +202,7 @@
         stack.push(node)
         while (stack.length) {
           const pop = stack.pop()
-          if ((pop.left ==null && pop.right == null) || (pop.left === lastNode|| pop.right === lastNode)) {
+          if ((pop.left == null && pop.right == null) || (pop.left === lastNode || pop.right === lastNode)) {
             cb(pop)
             lastNode = pop
           } else {
