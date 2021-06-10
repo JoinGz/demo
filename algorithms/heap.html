@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+
+    function left(i) {
+      return (i * 2) + 1
+    }
+
+    function right(i) {
+      return (i * 2) + 2
+    }
+
+    function swip(arr, max, i) {
+      let maxKey = arr[max]
+      arr[max] = arr[i]
+      arr[i] = maxKey
+    }
+
+    class Heap {
+      constructor(arr) {
+        this.data = [...arr];
+        this.length = this.data.length
+      }
+      rebulidHeapMini(i) {
+        if (i >= this.length ) {
+          return
+        }
+        let min = i;
+        let l = left(i);
+        let r = right(i);
+        if (this.data[l] < this.data[min]) {
+          min = l
+        }
+        if (this.data[r] < this.data[min]) {
+          min = r
+        }
+
+        if (min === i) {
+          return;
+        }
+
+        swip(this.data, min, i)
+        return this.rebulidHeapMini(min)
+      }
+      rebulidHeap(i) {
+        if (i >= this.length) {
+          return
+        }
+        let max = i;
+        let l = left(i);
+        let r = right(i);
+        if (l < this.length && this.data[l] > this.data[max]) {
+          max = l
+        }
+        /*
+        * 为什么要 l < this.length
+        因为排序的时候要动态this.length-- 相对于后面的是排好序了的，不要去动他，所以
+        */
+        if (r < this.length && this.data[r] > this.data[max]) {
+          max = r
+        }
+
+        if (max === i) {
+          return;
+        }
+
+        swip(this.data, max, i)
+        return this.rebulidHeap(max)
+      }
+      createHeap() {
+        const childNode = Math.floor(this.data.length / 2)
+        for (let i = childNode - 1; i >= 0; i--) {
+          this.rebulidHeap(i)
+        }
+      }
+      createHeapMini() { // 小顶
+        const childNode = Math.floor(this.data.length / 2)
+        for (let i = 0; i < childNode - 1; i++) {
+          this.rebulidHeapMini(i)
+        }
+      }
+
+      sort() {
+        let length = this.length
+        for (let i = this.length - 1; i > 0; i--) {
+          swip(this.data, 0, i)
+          this.length--
+          this.rebulidHeap(0)
+        }
+        this.length = length
+      }
+    }
+
+    const testarr = [1,2,3,4,5,6,7]
+    // const testarr = [7, 6, 5, 4, 3, 2, 1]
+
+    const data = new Heap(testarr)
+    data.createHeap()
+    data.sort()
+    console.log(data.data);
+    // 7
+    // 6 5
+    // 4 3 2 1
+  </script>
+</body>
+
+</html>
