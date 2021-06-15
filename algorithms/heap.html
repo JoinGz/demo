@@ -31,7 +31,7 @@
         this.length = this.data.length
       }
       rebulidHeapMini(i) {
-        if (i >= this.length ) {
+        if (i >= this.length) {
           return
         }
         let min = i;
@@ -98,14 +98,50 @@
         }
         this.length = length
       }
+
+      needRebuild() {
+        const lastNodeIndex = Math.floor(this.length / 2)
+
+        let i = lastNodeIndex - 1
+        const l = this.data[left(i)] || Number.MIN_SAFE_INTEGER
+        const r = this.data[right(i)] || Number.MIN_SAFE_INTEGER
+        if (this.data[i] < l || this.data[i] < r) {
+          return true
+        }
+        return false
+      }
+
+      insert(key) {
+        this.data[this.length++] = key
+        if (this.needRebuild()) {
+          this.createHeap()
+        }
+        return
+      }
+
+      delete(key) {
+        for (let i = 0; i < this.data.length; i++) {
+          if (this.data[i] === key) {
+            this.data.splice(i, 1)
+            this.length--
+            break;
+          }
+        }
+
+
+        this.createHeap()
+
+
+      }
     }
 
-    const testarr = [1,2,3,4,5,6,7]
+    const testarr = [1, 2, 3, 4, 5, 6, 7]
     // const testarr = [7, 6, 5, 4, 3, 2, 1]
 
     const data = new Heap(testarr)
     data.createHeap()
     data.sort()
+    // data.insert(0)
     console.log(data.data);
     // 7
     // 6 5
