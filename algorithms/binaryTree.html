@@ -88,7 +88,9 @@
       remove(key, node) {
         node = node || this.root
         // return this._remove(key, node)
-        return this._remove2(key, node)
+        // return this._remove2(key, node)
+        return this.root = this.remove3(node, key, )
+
 
       }
       findPnode(node) {
@@ -292,6 +294,36 @@
         }
 
       }
+
+      remove3 (node, key) {
+        if (node == null) {
+          return null
+        }
+
+        if (node.key === key) {
+          if (!node.left && !node.right){
+            return null;
+          } else if (node.left == null) {
+            return node.right
+          } else if (node.right == null) {
+            return node.left
+          } else {
+            const rightMin = this.min(node.right)
+            node.key = rightMin.key
+            node.right = this.remove3(node.right, rightMin.key)
+          }
+        } else if (key < node.key) {
+          node.left = this.remove3(node.left, key)
+          return node
+        } else {
+          node.right = this.remove3(node.right, key)
+          return node
+        }
+
+      }
+      removeWithWhile (node, key) {
+        
+      }
     }
     var t = new binarySearchTree()
     t.insert(100)
@@ -310,50 +342,6 @@
       // .insert(95)
 
 
-  </script>
-  <script>
-
-    // 获取给定节点下的二叉树最小值
-    binarySearchTree.prototype.getSmallest = function (node) {
-      if (node.left == null) {
-        return node;
-      } else {
-        return getSmallest(node.left);
-      }
-    };
-    // 根据给定删除给定节点下二叉树的对应节点
-    binarySearchTree.prototype.removeNode = function (node, data) {
-      if (node == null) {
-        return null;
-      }
-      if (data == node.key) {
-        // 没有子节点（子树）
-        if (node.left == null && node.right == null) {
-          return null;
-        }
-        // 只有右子节点（子树）
-        else if (node.left == null) {
-          return node.right;
-        }
-        // 只有左子节点（子树）
-        else if (node.right == null) {
-          return node.left;
-        }
-        // 有两个子节点（子树）
-        else {
-          var tempNode = this.getSmallest(node.right);
-          node.key = tempNode.key;
-          node.right = this.removeNode(node.right, tempNode.key);
-          return node;
-        }
-      } else if (data < node.key) {
-        node.left = this.removeNode(node.left, key);
-        return node;
-      } else {
-        node.right = this.removeNode(node.right, key);
-        return node;
-      }
-    }
   </script>
 </body>
 
