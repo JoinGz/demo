@@ -2,6 +2,7 @@ process.env.BABEL_ENV = 'web'
 const path = require('path')
 const fs = require('fs')
 const HappyPack = require('HappyPack')
+const webpack = require('webpack')
 const isDevlopment = true
 
 console.log([path.resolve(__dirname, '../node_modules')])
@@ -38,6 +39,9 @@ function exportConfig() {
         id: 'babel',
         // 处理文件，用法和Loader配置是一样的
         loaders: [`babel-loader?cacheDirectory=${isDevlopment ? true : false}`],
+      }),
+      new webpack.DefinePlugin({
+        __SERVER__: false,
       }),
     ],
     devServer: {

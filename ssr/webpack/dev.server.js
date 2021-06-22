@@ -2,6 +2,7 @@ console.warn('begin----')
 process.env.BABEL_ENV = 'node'
 const path = require('path')
 const fs = require('fs')
+const webpack = require('webpack')
 const HappyPack = require('HappyPack')
 const isDevlopment = true
 
@@ -51,6 +52,9 @@ function exportConfig() {
       //   // 处理文件，用法和Loader配置是一样的
       //   loaders: [`babel-loader?cacheDirectory=${isDevlopment ? true : false}`],
       // }),
+      new webpack.DefinePlugin({
+        __SERVER__: true,
+      }),
     ],
     // devServer: {
     //   contentBase: path.join(__dirname, '../dist'),

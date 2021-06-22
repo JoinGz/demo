@@ -11,9 +11,7 @@
           "@babel/preset-env",
           {
             "targets": {
-              "browsers": [
-                "last 3 versions"
-              ]
+              "chrome": "70"
             },
             "useBuiltIns": "usage",
             "corejs": 3

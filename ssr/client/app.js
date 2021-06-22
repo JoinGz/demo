@@ -1,15 +1,20 @@
 
 
 import React from 'react'
-import { Route, Switch, BrowserRouter, Redirect } from 'react-router-dom'
+import { Route, Switch, BrowserRouter, Redirect, Link } from 'react-router-dom'
 
-function App({ routeList }) {
+function App ({ routeList , }) {
+  console.log( 'app-props', routeList, )
   return (
     <div>
       <p>layout</p>
+      <Link to="/detail">detail</Link>
+      <br />
+      <Link to="/">home</Link>
+
       <Switch>
         {routeList.map((item) => {
-          return <Route key={item.path} {...item} />
+          return <Route key={item.path}  {...item} />
         })}
       </Switch>
     </div>
