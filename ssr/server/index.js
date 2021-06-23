@@ -11,6 +11,7 @@ const app = new Koa()
 import { matchRoutes } from 'react-router-config'
 import routeList from '../client/route'
 import ClentApp from '../client/app.js'
+import getStaticRouter from '../client/getStaticRouter'
 //组件
 class Index extends React.Component {
   constructor(props) {
@@ -45,20 +46,20 @@ app.use(async (ctx, next) => {
 app.use(async (ctx) => {
   const url = ctx.url
   console.log('得到的url: ' + url)
-  const branch = matchRoutes(routeList, url)
+  const staticRouter = await getStaticRouter(routeList)
+  const branch = matchRoutes(staticRouter, url)
   let html, ssrData = {};
 
   if (branch && branch[0]) {
     //得到要渲染的组件
     let Component = branch[0].route.component
-    let relComponent = await getRealComponent(Component)
-    if (relComponent.getInitialProps) {
-      ssrData = await relComponent.getInitialProps()
+    if (Component.getInitialProps) {
+      ssrData = await Component.getInitialProps()
       console.log(`ssrData: ${JSON.stringify(ssrData)}`)
     }
     html = renderToString(
       <StaticRouter location={ctx.url} context={ssrData}>
-        <ClentApp routeList={routeList}></ClentApp>
+        <ClentApp routeList={staticRouter}></ClentApp>
       </StaticRouter>
     )
   } else {
@@ -85,13 +86,3 @@ const port = 3003
 app.listen(port, () => {
   console.log(`[demo] server is starting at port ${port}`)
 })
-
-
-async function getRealComponent (component) {
-  if (component.isAsyncCom) {
-    const com = await component().props.load()
-    return com.default
-  } else {
-    return component
-  }
-}
