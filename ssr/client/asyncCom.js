@@ -1,12 +1,14 @@
 import React from 'react'
 
-export default class AsyncCom extends React.Component {
+class AsyncCom extends React.Component {
   constructor(s) {
     super(s)
     this.state = {
       com: null,
     }
   }
+
+
   UNSAFE_componentWillMount() {
     //执行组件加载
     if (!this.state.com) {
@@ -14,13 +16,16 @@ export default class AsyncCom extends React.Component {
     }
   }
 
-  load(props) {
+  load (props) {
     this.setState({ com: null })
-    props.load().then((com) => {
-      this.setState({ com: com ? com.default : com })
-    }).catch(e => {
-      console.log(e)
-    })
+    props
+      .load()
+      .then((com) => {
+        this.setState({ com: com ? com.default : com })
+      })
+      .catch((e) => {
+        console.log(e)
+      })
   }
 
   render () {
@@ -31,3 +36,5 @@ export default class AsyncCom extends React.Component {
     )
   }
 }
+
+export default AsyncCom

@@ -17,6 +17,7 @@ function exportConfig() {
       // libraryTarget: 'umd',
       // publicPath: path.join(__dirname, '../'),
       path: path.join(__dirname, '../dist'),
+      chunkFilename: `[name].js`,
     },
     context: path.join(__dirname, '..'),
     resolve: {

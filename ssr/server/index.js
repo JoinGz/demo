@@ -50,10 +50,10 @@ app.use(async (ctx) => {
 
   if (branch && branch[0]) {
     //得到要渲染的组件
-    const Component = branch[0].route.component
-    let data = fetch()
-    if (Component.getInitialProps) {
-      ssrData = await Component.getInitialProps()
+    let Component = branch[0].route.component
+    let relComponent = await getRealComponent(Component)
+    if (relComponent.getInitialProps) {
+      ssrData = await relComponent.getInitialProps()
       console.log(`ssrData: ${JSON.stringify(ssrData)}`)
     }
     html = renderToString(
@@ -85,3 +85,13 @@ const port = 3003
 app.listen(port, () => {
   console.log(`[demo] server is starting at port ${port}`)
 })
+
+
+async function getRealComponent (component) {
+  if (component.isAsyncCom) {
+    const com = await component().props.load()
+    return com.default
+  } else {
+    return component
+  }
+}

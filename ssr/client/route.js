@@ -1,28 +1,31 @@
 import Detail from './detail'
-import Home from './home'
-// import AsyncCom from './asyncCom'
-// import React from 'react'
 
-// const asyncHome = function (props) {
-//   console.log('AsyncHome')
+import AsyncCom from './asyncCom'
+import React from 'react'
 
-//   console.log(props)
-//   return (
-//     <AsyncCom
-//       load={() => {
-//         return import('./home')
-//       }}
-//     >
-//       {(Com) => <Com {...props}></Com>}
-//     </AsyncCom>
-//   )
-// }
+const asyncHome = function (props) {
+  console.log('AsyncHome')
+
+  console.log(props)
+  return (
+    <AsyncCom
+      a = {1}
+      load={() => {
+        return import(/* webpackChunkName: "group-home" */  './home')
+      }}
+    >
+      {(Com) => <Com {...props}></Com>}
+    </AsyncCom>
+  )
+}
+
+asyncHome.isAsyncCom = true
 
 const routes = [
   {
     path: '/',
     exact: true,
-    component: Home,
+    component: asyncHome,
   },
   {
     path: '/detail',
