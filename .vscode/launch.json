@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "启动程序2",
+      "name": "启动ssr服务端",
       "skipFiles": [
         "<node_internals>/**"
       ],

@@ -1,3 +1,7 @@
+// 同步数据的高阶组件
+// 作用1： 把server端传入的数据同步到此组件state
+// 作用2： 注册url变更事件，获取数据
+
 import React from 'react'
 
 async function isRegisterFn  ()  {

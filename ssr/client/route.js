@@ -3,6 +3,7 @@ import Detail from './detail'
 import AsyncCom from './asyncCom'
 import React from 'react'
 
+// 按需加载函数
 const asyncHome = function (props) {
   console.log('AsyncHome')
 

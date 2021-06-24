@@ -7,7 +7,9 @@ async function getStaticRouter(routeList) {
   for (let i = 0; i < routeList.length; i++) {
     const item = routeList[i]
     if (item.component && item.component.isAsyncCom) {
+      // 加载按需加载的组件
       const com = await item.component().props.load()
+      // 拼接成静态路由
       staticRouteList.push({
         ...item,
         component: com ? com.default : item.component(),

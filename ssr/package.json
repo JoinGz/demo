@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:ser": "webpack --config ./webpack/dev.server.js",
+    "dev:ser": "node ./webpack/launch.server.js",
     "dev:cli": "webpack serve --config ./webpack/dev.client.js"
   },
   "keywords": [],
