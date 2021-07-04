@@ -76,5 +76,46 @@
 
       mydtgh([2, 2, 6, 5, 4], [6, 3, 5, 4, 6], 10)
     </script>
+    <script>
+      function mydynamic(weight, value, target) {
+        const result = []
+        result[-1] = []
+        result[-1].length = target + 1
+        result[-1].fill(0)
+
+        for (let i = 0; i < weight.length; i++) {
+          const w = weight[i];
+          result[i] = []
+          for (let j = 0; j <= target; j++) {
+
+            if (j >= w) {
+              result[i][j] = Math.max(result[i - 1][j], result[i - 1][j - w] + value[i])
+            } else {
+              result[i][j] = result[i - 1][j]
+            }
+
+          }
+        }
+        console.log(result)
+
+        const selected = []
+        let j = target, allWeight = 0;
+        for (let i = weight.length - 1; i >= 0; i--) {
+          // 如果 result[i][j] === result[i-1][j] 说明没有放入
+          if (result[i][j] > result[i - 1][j]) {
+            selected.push(weight[i])
+            j = j - weight[i] // 当前的减去已经计算过的重量 得到下一个最佳重量值
+            allWeight += weight[i] // 记录总重量和
+            console.log(`选择了${weight[i]}, 价值${value[i]}`)
+          }
+
+        }
+
+        console.log(`最大重量：${target}, 已选重量： ${allWeight}, 总价值：${result[weight.length - 1][target]}`)
+
+
+      }
+      mydynamic([2, 2, 6, 5, 4], [6, 3, 5, 4, 6], 10)
+    </script>
 </body>
 </html>
