@@ -41,9 +41,9 @@
            * 如 [1,2,2,2,3,4,5], 如果不加则2位2,3位2会被跳过
            * i > index 情况出现在已经循环了一遍的情况
            * 如： 因为 let i = index，所以第一次是不会大于index的，当这一轮循环完，chache.pop()执行后，
-           * i++, i就会大于index了，这是就进行去重判断
+           * i++, i就会大于index了，这时就进行去重判断
           */
-          if( i> index && arr[i-1] === item) {
+          if (i > index && arr[i - 1] === item) {
             debugger;
             continue
           };
