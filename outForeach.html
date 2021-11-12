@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function outForeach(arr) {
+      let i = -1;
+
+      function next() {
+        i++;
+        return {
+          value: arr[i],
+          done: i >= arr.length - 1
+        }
+      }
+      return { next }
+    }
+
+
+    function createIterator(items) {
+      var i = 0;
+      return {
+        next: function () {
+          var done = i >= items.length;
+          var value = !done ? items[i++] : undefined;
+
+          return {
+            done: done,
+            value: value
+          };
+        },
+        return: function () {
+          console.log("执行了 return 方法");
+          return {
+            value: 23333,
+            done: true
+          };
+        }
+      };
+    }
+
+    var colors = ["red", "green", "blue"];
+
+    var iterator = createIterator([1, 2, 3]);
+
+    colors[Symbol.iterator] = function () {
+      return iterator;
+    };
+
+    for (let color of colors) {
+      console.log(color);
+      if (color == 1) break;
+    }
+    // 执行了 return 方法
+
+
+    (function () {
+      var root = this;
+      function watch(obj, name, func) {
+        var value = obj[name];
+
+        Object.defineProperty(obj, name, {
+          get: function () {
+            return value;
+          },
+          set: function (newValue) {
+            value = newValue;
+            func(value)
+          }
+        });
+
+        if (value) obj[name] = value
+      }
+
+      this.watch = watch;
+    })()
+
+
+  </script>
+
+
+  <script>
+
+      // 自执行函数
+      (function (modules) {
+
+        // 用于储存已经加载过的模块
+        var installedModules = {};
+
+        function require(moduleName) {
+
+          if (installedModules[moduleName]) {
+            return installedModules[moduleName].exports;
+          }
+
+          var module = installedModules[moduleName] = {
+            exports: {}
+          };
+
+          modules[moduleName](module, module.exports, require);
+
+          return module.exports;
+        }
+
+        // 加载主模块
+        return require("main");
+
+      })({
+        "main": function (module, exports, require) {
+
+          var addModule = require("./add");
+          console.log(addModule.add(1, 1))
+
+          var squareModule = require("./square");
+          console.log(squareModule.square(3));
+
+        },
+        "./add": function (module, exports, require) {
+          console.log('加载了 add 模块');
+
+          module.exports = {
+            add: function (x, y) {
+              return x + y;
+            }
+          };
+        },
+        "./square": function (module, exports, require) {
+          console.log('加载了 square 模块');
+
+          var multiply = require("./multiply");
+          module.exports = {
+            square: function (num) {
+              return multiply.multiply(num, num);
+            }
+          };
+        },
+
+        "./multiply": function (module, exports, require) {
+          console.log('加载了 multiply 模块');
+
+          module.exports = {
+            multiply: function (x, y) {
+              return x * y;
+            }
+          };
+        }
+      })
+
+  </script>
+
+  <script>
+    Promise.resolve().then(() => {
+      console.log(0);
+      return Promise.resolve(4);
+    }).then((res) => {
+      console.log(res)
+    })
+
+    Promise.resolve().then(() => {
+      console.log(1);
+    }).then(() => {
+      console.log(2);
+    }).then(() => {
+      console.log(3);
+    }).then(() => {
+      console.log(5);
+    }).then(() => {
+      console.log(6);
+    })
+
+// 大家先思考一下
+
+
+  </script>
+</body>
+
+</html>

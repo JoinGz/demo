@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // setTimeout(() => {
+    //   document.body.style.background = 'red'
+    //   setTimeout(() => {
+    //     document.body.style.background = 'blue'
+    //   })
+    // })
+    setTimeout(() => {
+      console.log('sto1')
+      requestAnimationFrame(() => console.log('rAF1'))
+    },100)
+    setTimeout(() => {
+      console.log('sto2')
+      requestAnimationFrame(() => console.log('rAF2'))
+    },100)
+    queueMicrotask(() => console.log('mic1'))
+    queueMicrotask(() => console.log('mic2'))
+
+
+
+    var rAF = function () {
+      return (
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        function (callback) {
+          window.setTimeout(callback, 1000 / 60);
+        }
+      );
+    }();
+
+    let allFrames = 0;
+    let frames = 0;
+    // let now = new Date()
+    let lastTime = new Date()
+
+    var loop = function () {
+      let nowTime = new Date()
+      frames++
+      const spendTime = nowTime - lastTime
+      if (spendTime >= 1000) {
+        const fps = frames * 1000 / (spendTime)
+        console.log(spendTime + 'ms, fps: ' + ~~fps)
+        frames = 0
+        lastTime = nowTime
+      }
+
+      rAF(loop)
+    }
+
+    loop();
+
+
+    function test(IdleDeadline) {
+      if (IdleDeadline.didTimeout) {
+        console.log('ka l')
+      }
+      // console.log(IdleDeadline.didTimeout)
+      // console.log(IdleDeadline.timeRemaining() + 'ms')
+      requestIdleCallback(test)
+    }
+
+
+
+    requestIdleCallback(test)
+    
+
+  </script>
+</body>
+
+</html>

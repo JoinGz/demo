@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    let fnLable;
+    let cache = new Map()
+    function watch(obj, wathKey, fn) {
+      const hashKey = wathKey
+      if (!cache.get(hashKey)){
+        cache.set(hashKey, true)
+        defineSetGet(obj, wathKey)
+      }
+      fnLable = fn;
+
+      if (typeof fn === 'function') {
+        fn()
+        return;
+      }
+
+      if (/\./.test(wathKey)) {
+        wathKey = wathKey.split('.')
+        wathKey.forEach(key=>{
+          obj = obj[key]
+        })
+        return;
+      }
+
+
+      obj[wathKey];
+
+
+    }
+
+    function defineSetGet(obj, wathKey) {
+      if (/\./.test(wathKey)) {
+        wathKey = wathKey.split('.')
+        for (let i = 0; i < wathKey.length; i++) {
+          return defineSetGet(obj[wathKey[i]], wathKey.slice(1).join('.'))
+        }
+      }
+      const deps = []
+      let val = obj[wathKey]
+      Object.defineProperty(obj, wathKey, {
+        set(value) {
+          if (val === value) return;
+          val = value
+          deps.forEach(fn => fn())
+        },
+        get() {
+          fnLable && deps.push(fnLable)
+          fnLable = null;
+          return val
+        }
+      })
+    }
+
+    const a = {
+      b: 'b',
+      c: 'c',
+      d: {
+        e: 1
+      },
+      body: 123
+    }
+
+    watch(a, 'b', ()=>{
+      console.log('change')
+    })
+    watch(a, 'd.e', ()=>{
+      console.log('de-.>change')
+    })
+    watch(a, 'body', ()=>{
+      setTimeout(() => {
+        document.write(a.body)
+        console.log('body-back')
+      }, 1000);
+    })
+  </script>
+</body>
+
+</html>
