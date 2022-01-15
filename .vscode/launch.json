@@ -33,6 +33,16 @@
       ],
       "cwd": "${workspaceFolder}\\uploadFile", // 可执行程序的启动路径
       "program": "${workspaceFolder}\\uploadFile\\server.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "mini-pack启动程序",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}\\mini-webpack\\mini-pack", // 可执行程序的启动路径
+      "program": "${workspaceFolder}\\mini-webpack\\mini-pack\\pack.js"
     }
   ]
 }
