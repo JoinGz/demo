@@ -39,6 +39,129 @@
         return fn._fn(...[...father, ...son])
       }
     }
+  </script>
+  <div id="div" style="width: 500px;height: 500px;background: #ccc;">
+
+  </div>
+
+  <div id="container"></div>
+  <input type="text" onblur="console.log(_.escape(this.value))">
+  <input type="text" onblur="console.log(_.unescape(this.value))">
+  <script type="text/html" id="user_tmpl">
+        <% for ( var i = 0; i < users.length; i++ ) { %>
+            <li><a href="<%=users[i].url%>"><%=users[i].name%></a></li>
+        <% } %>
+    </script>
+
+
+
+
+  <script>
+    console.log('\r\n')
+    console.log('---new---')
+    console.log('\r\n')
+
+    // Function.prototype.myCall2 = function (obj, ...arg) {
+    //   obj = obj || window
+    //   obj.fn = this;
+    //   var result = obj.fn(...arg)
+    //   delete obj.fn
+    //   return result
+    // }
+
+    // // 测试一下
+    // var value = 2;
+
+    // var obj = {
+    //   value: 1
+    // }
+
+    // function bar(name, age) {
+    //   console.log(this.value);
+    //   return {
+    //     value: this.value,
+    //     name: name,
+    //     age: age
+    //   }
+    // }
+
+    // bar.myCall2(null); // 2
+
+    // console.log(bar.myCall2(obj, 'kevin', 18));
+
+
+    Function.prototype.test = function (obj, ...arg) {
+      const _this = this;
+      function x() {
+
+      }
+      x.prototype = this.prototype
+      function NNN(...b) {
+        return _this.call(this instanceof NNN ? this : obj, ...arg, ...b)
+      }
+      var xxx = new x()
+      NNN.prototype = Object.getPrototypeOf(xxx)
+      // NNN.prototype = new x()
+
+      return NNN;
+    }
+
+    Function.prototype.myBind = function (fn, ...father) {
+      fn = fn || window
+      const _this = this;
+      function NNN(...son) {
+        if (this instanceof NNN) {
+          fn = this;
+        }
+        fn._fn = _this;
+        let result = fn._fn(...father, ...son)
+        delete fn._fn
+        return result
+      }
+      function x() {
+
+      }
+      x.prototype = this.prototype
+      NNN.prototype = new x()
+      return NNN
+    }
+
+
+    Function.prototype.myBind = function (fn, ...father) {
+      fn = fn || window
+      const _this = this;
+      function NNN(...son) {
+        if (this instanceof NNN) {
+          fn = this;
+        }
+        fn._fn = _this;
+        let result = fn._fn(...father, ...son)
+        delete fn._fn
+        return result
+      }
+
+      NNN.prototype = this.prototype
+      return NNN
+    }
+
+    // let value = 'window'
+
+    // var a = {
+    //   value: 'a'
+    // }
+
+    // function log() {
+    //   console.log(this.value)
+    // }
+
+    // var aa = log.test(a)
+
+    // var y = new aa()
+
+
+
+    var value = 2;
+
     var foo = {
       value: 1
     };
@@ -125,7 +248,7 @@
 <script>
   var funcs = [];
   for (var i = 0; i < 10; i++) {
-    funcs[i] = (function(i){
+    funcs[i] = (function (i) {
       return function () {
         console.log(i);
       }
@@ -133,6 +256,445 @@
   }
   funcs[1](); // 3
 
+
+</script>
+
+
+
+<script>
+    function jieliu(fn, time, obj = {}) {
+      let isRuning;
+      let nowTime = +new Date();
+
+      return function () {
+        nowTime = +new Date()
+        if (new Date() - nowTime > time) {
+          if (isRuning) {
+            clearTimeout(isRuning)
+            isRuning = null;
+          }
+          console.log('直接执行')
+          fn.apply(this, arguments)
+          nowTime = +new Date();
+        } else {
+          if (!isRuning) {
+            isRuning = setTimeout(() => {
+              console.log('back')
+              fn.apply(this, arguments)
+              nowTime = +new Date();
+              isRuning = null; // 多余 setTime会在前面清除，所以之会在最后执行
+            }, time);
+          } else {
+            console.log('throttle中')
+          }
+        }
+
+      }
+
+    }
+
+    const clickFn = jieliu(function (e) {
+      console.log(e)
+    }, 1000)
+
+    document.querySelector('#div').addEventListener('click', clickFn)
+
+    function type(obj) {
+      if (typeof obj !== 'object' || typeof obj === 'function') {
+        return typeof obj
+      } else {
+        return Object.prototype.toString.call(obj).slice(8, -1)
+      }
+    }
+
+    // 第二版
+    function extend() {
+      // debugger;
+      // 默认不进行深拷贝
+      var deep = false;
+      var name, options, src, copy;
+      var length = arguments.length;
+      // 记录要复制的对象的下标
+      var i = 1;
+      // 第一个参数不传布尔值的情况下，target默认是第一个参数
+      var target = arguments[0] || {};
+      // 如果第一个参数是布尔值，第二个参数是才是target
+      if (typeof target == 'boolean') {
+        deep = target;
+        target = arguments[i] || {};
+        i++;
+      }
+      // 如果target不是对象，我们是无法进行复制的，所以设为{}
+      if (typeof target !== 'object') {
+        target = {}
+      }
+
+      // 循环遍历要复制的对象们
+      for (; i < length; i++) {
+        // 获取当前对象
+        options = arguments[i];
+        // 要求不能为空 避免extend(a,,b)这种情况
+        if (options != null) {
+          for (name in options) {
+            // 目标属性值
+            src = target[name];
+            // 要复制的对象的属性值
+            copy = options[name];
+
+            if (deep && copy && typeof copy == 'object') {
+              // 递归调用
+              target[name] = extend(deep, src, copy);
+            }
+            else if (copy !== undefined) {
+              target[name] = copy;
+            }
+          }
+        }
+      }
+
+      return target;
+    };
+
+
+
+    var obj1 = {
+      a: 1,
+      b: { b1: 1, b2: 2 }
+    };
+
+    var obj2 = {
+      b: { b1: 3, b3: 4 },
+      c: 3
+    };
+
+    var obj3 = {
+      d: 4
+    }
+
+    console.log(extend(true, obj1, obj2, obj3));
+
+
+</script>
+<script>
+
+    // var curry = fn =>
+    // judge = (...args) =>
+    //     args.length >= fn.length
+    //         ? fn(...args)
+    //         : (...arg) => judge(...args, ...arg)
+
+    function curry(fn) {
+      const length = fn.length
+      return function _curry(...lastArg) {
+        if (lastArg.length === length) {
+          return fn.apply(this, lastArg)
+        } else {
+          return function () {
+            return _curry.call(this, ...lastArg, ...arguments)
+          }
+        }
+      }
+    }
+
+    /*
+    深受启发，这样理解柯里化 ：用闭包把参数保存起来，当参数的数量足够执行函数了，就开始执行函数，有没有毛病
+    这里也不需要闭包，一直增加参数即可
+    */
+
+    // func 是要转换的函数
+    function curry(func) {
+
+      return function curried(...args) {
+        if (args.length >= func.length) {
+          return func.apply(this, args);
+        } else {
+          return function (...args2) {
+            return curried.apply(this, args.concat(args2));
+          }
+        }
+      };
+
+    }
+
+    var fn = curry(function (a, b, c) {
+      console.log([a, b, c])
+      return;
+    });
+
+
+
+    fn("a", "b", "c") // ["a", "b", "c"]
+    fn("a", "b")("c") // ["a", "b", "c"]
+    fn("a")("b")("c") // ["a", "b", "c"]
+    fn("a")("b", "c") // ["a", "b", "c"]
+
+
+    var foo = function () {
+      var t = new Date();
+      foo = function () {
+        return t;
+      };
+      return foo();
+    };
+
+
+</script>
+
+<script>
+
+</script>
+<script>
+    function listFn(...arrFn) {
+      return function () {
+        let fnNum = arrFn.length - 1
+        const lastFn = arrFn[fnNum]
+        let reuslt = lastFn.apply(this, arguments)
+        while (fnNum--) {
+          reuslt = arrFn[fnNum].call(this, reuslt)
+        }
+        return reuslt
+      }
+    }
+
+    // function compose() {
+    //   var args = arguments;
+    //   var start = args.length - 1;
+    //   return function () {
+    //     var i = start;
+    //     var result = args[start].apply(this, arguments);
+    //     while (i--) result = args[i].call(this, result);
+    //     return result;
+    //   };
+    // };
+
+    var xxx = compose((a) => a + 1, (a) => a + 2, (a) => a + 3)
+    console.log(xxx(10))
+
+    var xxx2 = listFn((a) => a + 1, (a) => a + 2)
+    // console.log(xxx2(10))
+
+    function compose(...funcs) {
+      if (funcs.length === 0) {
+        return arg => arg
+      }
+
+      if (funcs.length === 1) {
+        return funcs[0]
+      }
+
+      return funcs.reduce((a, b) => {
+        return (...args) => a(b(...args))
+      })
+    }
+
+
+</script>
+
+<script>
+
+    /**
+ * 模板引擎第五版
+ */
+
+    var settings = {
+      // 求值
+      evaluate: /<%([\s\S]+?)%>/g,
+      // 插入
+      interpolate: /<%=([\s\S]+?)%>/g,
+    };
+
+    var escapes = {
+      "'": "'",
+      '\\': '\\',
+      '\r': 'r',
+      '\n': 'n',
+      '\u2028': 'u2028',
+      '\u2029': 'u2029'
+    };
+
+    var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
+
+
+    // var template = function (text) {
+
+    //   var source = "var __p='';\n";
+    //   source = source + "with(obj){\n"
+    //   source = source + "__p+='";
+
+    //   var main = text
+    //     .replace(escapeRegExp, function (match) {
+    //       return '\\' + escapes[match];
+    //     })
+    //     .replace(settings.interpolate, function (match, interpolate) {
+    //       return "'+\n" + interpolate + "+\n'"
+    //     })
+    //     .replace(settings.evaluate, function (match, evaluate) {
+    //       return "';\n " + evaluate + "\n__p+='"
+    //     })
+
+    //   source = source + main + "';\n }; \n return __p;";
+
+    //   console.log(source)
+
+    //   var render = new Function('obj', source);
+
+    //   return render;
+    // };
+
+    var results = document.getElementById("container");
+
+    var data = {
+      users: [
+        { "name": "Byron", "url": "http://localhost" },
+        { "name": "Casper", "url": "http://localhost" },
+        { "name": "Frank", "url": "http://localhost" }
+      ]
+    }
+
+    var text = document.getElementById("user_tmpl").innerHTML
+
+
+
+    var template = function (text) {
+      var matcher = RegExp([
+        (settings.interpolate).source,
+        (settings.evaluate).source
+      ].join('|') + '|$', 'g');
+
+      var index = 0;
+      var source = "__p+='";
+
+      text.replace(matcher, function (match, interpolate, evaluate, offset) {
+        source += text.slice(index, offset).replace(escapeRegExp, function (match) {
+          return '\\' + escapes[match];
+        });
+
+        index = offset + match.length;
+
+        if (interpolate) {
+          source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+        } else if (evaluate) {
+          source += "';\n" + evaluate + "\n__p+='";
+        }
+
+        return match;
+      });
+
+      source += "';\n";
+
+      source = 'with(obj||{}){\n' + source + '}\n'
+
+      source = "var __t, __p='';" +
+        source + 'return __p;\n';
+
+      var render = new Function('obj', source);
+
+      return render;
+    };
+
+
+    var compiled = template(text);
+    results.innerHTML = compiled(data);
+
+    /**
+ * 返回一个object副本，使其键（keys）和值（values）对换。
+ * _.invert({a: "b"});
+ * => {b: "a"};
+ */
+    var _ = {};
+
+    var unescapeMap = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#x27;': "'",
+      '&#x60;': '`'
+    };
+
+    _.unescape = function (string) {
+      var escaper = function (match) {
+        return unescapeMap[match];
+      };
+      // 使用非捕获性分组
+      var source = '(?:' + Object.keys(unescapeMap).join('|') + ')';
+      console.log(source) // (?:&|<|>|"|'|`)
+      var testRegexp = RegExp(source);
+      var replaceRegexp = RegExp(source, 'g');
+
+      string = string == null ? '' : '' + string;
+      return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
+    }
+    // var _ = {};
+
+    var escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '`': '&#x60;'
+    };
+
+    _.escape = function (string) {
+      var escaper = function (match) {
+        return escapeMap[match];
+      };
+      // 使用非捕获性分组
+      var source = '(?:' + Object.keys(escapeMap).join('|') + ')';
+      console.log(source) // (?:&|<|>|"|'|`)
+      var testRegexp = RegExp(source);
+      var replaceRegexp = RegExp(source, 'g');
+
+      string = string == null ? '' : '' + string;
+      return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
+    }
+
+// console.log(_.unescape('Curly, Larry &amp; Moe')) // Curly, Larry & Moe
+
+
+</script>
+</body>
+<script>
+  let html = `
+	<ul>
+		<li>1</li>
+		  <li>2</li>
+		    <li>3</li>
+	<ul>
+`;
+
+
+  function stripIndent(template, ...expressions) {
+    let result = template.reduce((prev, next, i) => {
+      let expression = expressions[i - 1];
+      return prev + expression + next;
+    });
+
+    const match = result.match(/^[^\S\n]*(?=\S)/gm);
+    console.log(match); // Array [ "    ", "        ", "        ", "        ", "    " ]
+
+    const indent = match && Math.min(...match.map(el => el.length));
+    console.log(indent); // 4
+
+    if (indent) {
+      const regexp = new RegExp(`^.{${indent}}`, 'gm');
+      console.log(regexp); // /^.{4}/gm
+
+      result = result.replace(regexp, '');
+    }
+
+    result = result.trim();
+
+    return result;
+  }
+console.log(stripIndent`
+    <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+    <ul>
+`)
 </script>
 
 </html>
