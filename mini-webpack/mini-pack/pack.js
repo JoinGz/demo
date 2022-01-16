@@ -4,7 +4,7 @@ import url from 'url'
 
 // 代码解析成ast
 import parser from '@babel/parser'
-// 遍历节点然后调用用户回调
+// 遍历ast然后调用用户回调
 import traverse from '@babel/traverse'
 import { transformFromAst } from 'babel-core'
 import ejs from 'ejs'
@@ -15,7 +15,6 @@ let id = 0
 
 function getDepends({ absPath, relPath }) {
   const depends = []
-  // const filePath = path.resolve(__dirName, filepath)
 
   const indexContent = fs.readFileSync(absPath, { encoding: 'utf-8' })
 
@@ -30,11 +29,7 @@ function getDepends({ absPath, relPath }) {
     ImportDeclaration(data) {
       asbPath = data.node.source.value
       depends.push({
-        absPath: `${path.resolve(
-          absPath,
-          '..',
-          data.node.source.value
-        )}`,
+        absPath: `${path.resolve(absPath, '..', data.node.source.value)}`,
         relPath: data.node.source.value,
       })
     },
@@ -65,8 +60,10 @@ firstJSdepends.push(
 )
 
 for (const item of firstJSdepends) {
-  console.log(item)
-  item.depends.length && firstJSdepends.push(getDepends(item.depends[0]))
+  // console.log(item)
+  item.depends.forEach(item => {
+    firstJSdepends.push(getDepends(item))
+  })
 }
 // 筛选出唯一依赖（根据相同的绝对路径）
 const onlyDependsMap = {}
@@ -89,7 +86,6 @@ console.log(onlyDepends)
 // console.log(relAbsMap)
 
 // 绝对路径和Id的关系
-
 const AbsIdMap = firstJSdepends.reduce((result, item) => {
   result[item.absPath] = item
   return result
@@ -97,27 +93,36 @@ const AbsIdMap = firstJSdepends.reduce((result, item) => {
 
 console.log(AbsIdMap)
 
+function getRenderAbsIdMap(AbsIdMap) {
+  const result = Object.values(AbsIdMap).reduce((result, item) => {
+    // 设置依赖的id,根据其绝对路径来获取对应的id
+    item.depends.forEach((dependsItem) => {
+      dependsItem.id = AbsIdMap[dependsItem.absPath]['id']
+    })
+    result[item.id] = {
+      code: toFunction(item.code),
+      depends: item.depends.reduce((rs, item) => {
+        rs[item.relPath] = item.id
+        return rs
+      }, {}),
+    }
+    return result
+  }, {})
+  return result
+}
+const renderIdMap = getRenderAbsIdMap(AbsIdMap)
+console.log(renderIdMap)
 
-const template = fs.readFileSync('./require.js', { encoding: 'utf-8' })
+const template = fs.readFileSync('./require.ejs', { encoding: 'utf-8' })
 
-const code = ejs.render(template, {firstJSdepends})
+const code = ejs.render(template, { renderIdMap })
 
+fs.writeFileSync('./dist/main.js', code, { encoding: 'utf-8' })
 
-// ((function (pathAndId) {
-//   function getIdFromPath (path) {
-//     return pathAndId[path]
-//   }
-//   function require (path) {
-//     let module = {}
-//     let exports = {}
-//     const id = getIdFromPath(path)
-//     exports = id.code(require, )
-//     module.exports = exports
-//     return module
-//   }
-
-//   require('./index.js')
-
-// })(JSON.stringify()))
-
-fs.writeFileSync('./dist/main.js', code, {encoding: 'utf-8', })
+function toFunction(codeStr) {
+  return codeStr
+  // 没有使用ejs时的处理
+  // return `function (require, module, exports) {
+  //   ${codeStr}
+  // }`
+}

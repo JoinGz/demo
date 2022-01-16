@@ -1,0 +1,42 @@
+;(function (pathAndId) {
+  function getObjFromId(path) {
+    return pathAndId[path]
+  }
+  function require(id) {
+    let module = {exports: {}}
+    const obj = getObjFromId(id)
+    obj.code(requirePath, module, module.exports)
+    function requirePath(path) {
+      const id = obj.depends[path]
+      return require(id)
+    }
+    return module.exports
+  }
+
+  require(0)
+})({
+  <% for (const key in renderIdMap) {%>
+    <%-key %> : {
+      code: function (require, module, exports) {
+        <%-renderIdMap[key].code %>
+      },
+      depends: <%-JSON.stringify(renderIdMap[key].depends) %>
+    },
+    
+<% } %>
+  
+  // 0: {
+  //   code: function (require, module, exports) {
+  //     'use strict'
+  //     var _sayHello = require('./src/sayHello.js')
+  //     var _sayHello2 = _interopRequireDefault(_sayHello)
+  //     function _interopRequireDefault(obj) {
+  //       return obj && obj.__esModule ? obj : { default: obj }
+  //     }
+  //     ;(0, _sayHello2.default)()
+  //   },
+  //   depends: { './src/sayHello.js': 1 },
+  // }
+
+ 
+})
