@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+<script>
+  document.addEventListener('DOMContentLoaded', () => console.log("DOM ready!"));
+</script>
+<!-- <script src="/a.js"></script> -->
+
+<script async src="/b.js"></script>
+
+</head>
+<body>
+  ok!
+</body>
+<script>
+  function loadScript(src) {
+  let script = document.createElement('script');
+  script.src = src;
+console.log(script.async);
+
+  script.async = false;
+  
+  document.body.append(script);
+debugger
+}
+
+// long.js 先执行，因为代码中设置了 async=false
+loadScript("./a.js");
+
+</script>
+</html>

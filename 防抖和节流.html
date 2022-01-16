@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div style="height: 100vh; width: 100vw;background: #2e2e2e;">
+
+  </div>
+  <script>
+    function fandou(fn, time, run) {
+      let id;
+      return function () {
+        if (id) clearTimeout(id)
+        if (run) {
+          let callNow = !id;
+          id = setTimeout(() => {
+            console.log('重置了')
+            id = null;
+          }, time);
+          if (callNow) fn.apply(this, arguments)
+        } else {
+          id = setTimeout(() => {
+            fn.apply(this, arguments)
+          }, time);
+        }
+      }
+    }
+
+    // 第四版
+    function debounce(func, wait, immediate) {
+
+      var timeout;
+
+      return function () {
+        var context = this;
+        var args = arguments;
+
+        if (timeout) clearTimeout(timeout);
+        if (immediate) {
+          // 如果已经执行过，不再执行
+          var callNow = !timeout;
+          timeout = setTimeout(function () {
+            timeout = null;
+          }, wait)
+          if (callNow) func.apply(context, args)
+        }
+        else {
+          timeout = setTimeout(function () {
+            func.apply(context, args)
+          }, wait);
+        }
+      }
+    }
+
+
+    // const clickFn = fandou(function (e) {
+    //   console.log(this)
+    //   console.log(e)
+
+    //   console.log('fandou')
+    // }, 500, true)
+    // document.body.onclick = clickFn;
+    // document.body.addEventListener('click',clickFn)
+
+    function jieliu(fn, time) {
+      let id;
+      return function () {
+        if (!id) {
+          id = true
+          setTimeout(() => {
+            fn.apply(this, arguments)
+            id = false
+          }, time);
+        }
+      }
+    }
+
+    function jieliu2(fn, time, firstRun) {
+      let id;
+      return function () {
+        if (firstRun) {
+          fn.apply(this, arguments)
+          firstRun = false
+        } else {
+          if (!id) {
+            id = true
+            setTimeout(() => {
+              fn.apply(this, arguments)
+              id = false
+            }, time);
+          }
+        }
+
+      }
+    }
+
+    const clickFn = throttle(function (e) {
+      console.log(this)
+      console.log(e)
+
+      console.log('fandou')
+    }, 500, true)
+    document.body.onclick = clickFn;
+
+
+    // 第三版
+    function throttle(func, wait) {
+
+      var timeout, context, args, result;
+      var previous = 0;
+
+      var later = function () {
+        previous = +new Date();
+        timeout = null;
+        func.apply(context, args)
+      };
+
+      var throttled = function () {
+        debugger;
+        var now = +new Date();
+        //下次触发 func 剩余的时间
+        var remaining = wait - (now - previous);
+        context = this;
+        args = arguments;
+        // 如果没有剩余的时间了或者你改了系统时间
+        if (remaining <= 0 || remaining > wait) {
+          if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+          }
+          previous = now;
+          func.apply(context, args);
+        } else if (!timeout) {
+          timeout = setTimeout(later, remaining);
+        }
+      };
+      return throttled;
+    }
+
+  </script>
+  <script>
+    function curry(fn, args = []) {
+      const length = fn.length
+      return function _curry(...arg) {
+        const arr = [...args, ...arg]
+        if (arr.length === length) {
+          return fn.apply(this, arr)
+        } else {
+          return curry.call(this, fn, arr)
+        }
+      }
+    }
+
+    var fn = curry(function (a, b, c) {
+      console.log([a, b, c]);
+    });
+
+    // fn("a", "b", "c") // ["a", "b", "c"]
+    // fn("a", "b")("c") // ["a", "b", "c"]
+    // fn("a")("b")("c") // ["a", "b", "c"]
+    // fn("a")("b", "c") // ["a", "b", "c"]
+  </script>
+  <script>
+    // const curry2 = (fn) => 
+    // abc = (...arg) => arg.length === fn.length ? fn(...arg) :  (...args) => abc(...arg, ...args)
+    
+
+    var curry2 = fn =>
+    judge = (...args) =>
+        args.length === fn.length
+            ? fn(...args)
+            : (...arg) => judge(...args, ...arg)
+var fn2 = curry2(function (a, b, c) {
+      console.log([a, b, c]);
+    });
+    fn2("a", "b", "c") // ["a", "b", "c"]
+    fn2("a", "b")("c") // ["a", "b", "c"]
+    fn2("a")("b")("c") // ["a", "b", "c"]
+    fn2("a")("b", "c") // ["a", "b", "c"]
+
+    function p(a) {
+      const bibao = 'bibao'
+      return g(a)
+    }
+    function g(a) {
+      debugger;
+      console.log(a)
+    }
+    p()
+  </script>
+</body>
+
+</html>

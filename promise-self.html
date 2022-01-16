@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    // 先定义三个常量表示状态
+    const PENDING = 'pending';
+    const FULFILLED = 'fulfilled';
+    const REJECTED = 'rejected';
+
+    class Mypomise {
+      constructor(fn) {
+        fn(this.resolve, this.reject)
+      }
+      onSuccessArr = []
+      onFailArr = []
+      state = PENDING
+      value = null;
+      failValue = null;
+
+      resolve = (value) => {
+        if (this.state == PENDING) {
+          this.state = FULFILLED
+          this.value = value
+          while (this.onSuccessArr.length) {
+            this.onSuccessArr.length.shift()(value)
+          }
+        }
+      }
+      reject = (value) => {
+        if (this.state == PENDING) {
+          this.state = REJECTED
+          this.failValue = value;
+
+          while (this.onFailArr.length) {
+            this.onFailArr.length.shift()(value)
+          }
+        }
+      }
+      then = (successFn, failFn) => {
+        const promise2 = new Mypomise((resolve, reject) => {
+          // this指向，且是立即执行
+          if (this.state == FULFILLED) {
+            const fnResult = successFn(this.value)
+            resolvePromise(fnResult, resolve, reject)
+          } else if (this.state == REJECTED) {
+            failFn(this.failValue)
+          } else if (this.state == PENDING) {
+            this.onSuccessArr.push(successFn)
+            this.onFailArr.push(failFn)
+
+          }
+
+        })
+
+        return promise2
+
+      }
+    }
+
+    const p = new Promise((r, j) => {
+      setTimeout(() => {
+        r('ok')
+      }, 2000)
+    })
+
+    p.then((data) => {
+      console.log('then->' + data)
+      return new Mypomise(r=>r('xixi'))
+    })
+
+    p.then(data=>console.log('haha'+data))
+
+    // MyPromise.js
+    function resolvePromise(x, resolve, reject) {
+      // 判断x是不是 MyPromise 实例对象
+      if (x instanceof MyPromise) {
+        // 执行 x，调用 then 方法，目的是将其状态变为 fulfilled 或者 rejected
+        // x.then(value => resolve(value), reason => reject(reason))
+        // 简化之后
+        x.then(resolve, reject)
+      } else {
+        // 普通值
+        resolve(x)
+      }
+    }
+
+  </script>
+</body>
+
+</html>

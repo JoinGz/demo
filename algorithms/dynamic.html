@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    function a(weight, value, target) {
+        console.log(weight, value, target)
+        const result = []
+        result[0] = []
+
+        // 先对第一行就是判断，因为后面的判断基于此(不放入的就会用上一个的值)
+        for (let i = 0; i < target; i++) {
+          //  只需要和第一个进行判断即可
+          if (i >= weight[0]) {
+            result[0][i] = value[0]
+          } else {
+            result[0][i] = 0
+          }
+        }
+
+
+        //  i = 0 时 已经判断过了
+
+        for (let i = 0; i < target; i++) {
+          for (let j = 1; j < weight.length; j++) {
+            const w = weight[j];
+            if (!result[j]) {
+              result[j] = []
+            }
+            if (i >= w) {
+              // 理解 result[j - 1][i - w] + value[j]
+              // 这是不放入的情况，拿到 i - w (当前target容量-当前weight容量)的最佳容量加上自己的容量 
+              result[j][i] = Math.max(result[j - 1][i], result[j - 1][i - w] + value[j])
+            } else {
+              result[j][i] = result[j - 1][i]
+            }
+
+          }
+
+        }
+        console.log(result)
+      }
+      a([2, 2, 6, 5, 4], [6, 3, 5, 4, 6], 10)
+
+      console.log('\r\n')
+  </script>
+    <script>
+      function mydtgh(weight, value, target) {
+        const result = []
+        result[-1] = []
+        result[-1].length = target + 1;
+        result[-1].fill(0)
+        for (let i = 0; i < weight.length; i++) {
+          const w = weight[i];
+          result[i] = []
+          for (let j = 0; j <= target; j++) {
+
+            if (w > j) {
+              result[i][j] = result[i - 1][j]
+            } else {
+              result[i][j] = Math.max(result[i - 1][j], result[i - 1][j - w] + value[i])
+
+            }
+
+          }
+        }
+
+        console.log(result)
+        return result[weight.length - 1][target]
+      }
+
+      mydtgh([2, 2, 6, 5, 4], [6, 3, 5, 4, 6], 10)
+    </script>
+    <script>
+      function mydynamic(weight, value, target) {
+        const result = []
+        result[-1] = []
+        result[-1].length = target + 1
+        result[-1].fill(0)
+
+        for (let i = 0; i < weight.length; i++) {
+          const w = weight[i];
+          result[i] = []
+          for (let j = 0; j <= target; j++) {
+
+            if (j >= w) {
+              result[i][j] = Math.max(result[i - 1][j], result[i - 1][j - w] + value[i])
+            } else {
+              result[i][j] = result[i - 1][j]
+            }
+
+          }
+        }
+        console.log(result)
+
+        const selected = []
+        let j = target, allWeight = 0;
+        for (let i = weight.length - 1; i >= 0; i--) {
+          // 如果 result[i][j] === result[i-1][j] 说明没有放入
+          if (result[i][j] > result[i - 1][j]) {
+            selected.push(weight[i])
+            j = j - weight[i] // 当前的减去已经计算过的重量 得到下一个最佳重量值
+            allWeight += weight[i] // 记录总重量和
+            console.log(`选择了${weight[i]}, 价值${value[i]}`)
+          }
+
+        }
+
+        console.log(`最大重量：${target}, 已选重量： ${allWeight}, 总价值：${result[weight.length - 1][target]}`)
+
+
+      }
+      mydynamic([2, 2, 6, 5, 4], [6, 3, 5, 4, 6], 10)
+    </script>
+</body>
+</html>

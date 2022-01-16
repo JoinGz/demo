@@ -1,0 +1,37 @@
+{
+  "name": "ssr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:ser": "node ./webpack/launch.server.js",
+    "dev:cli": "webpack serve --config ./webpack/dev.client.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/plugin-transform-runtime": "^7.14.5",
+    "@babel/preset-env": "^7.14.5",
+    "@babel/preset-react": "^7.14.5",
+    "@babel/runtime": "^7.14.6",
+    "@babel/runtime-corejs3": "^7.14.6",
+    "axios": "^0.21.1",
+    "babel-loader": "^8.2.2",
+    "cookies": "^0.8.0",
+    "happypack": "^5.0.1",
+    "koa": "^2.13.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router": "^5.2.0",
+    "react-router-config": "^5.1.1",
+    "react-router-dom": "^5.2.0",
+    "webpack": "^5.39.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.7.2"
+  }
+}

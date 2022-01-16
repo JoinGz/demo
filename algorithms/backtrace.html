@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function backTrace(arr, target) {
+      if (!Array.isArray(arr)) {
+        return 'isn\'t array'
+      }
+
+      const length = arr.length
+      if (!length) {
+        return arr;
+      }
+
+      const result = [];
+      const cache = [];
+      arr = arr.sort((a, b) => a - b)
+
+      function help(result, cache, index, target, arr) {
+        if (target === 0) {
+          return result.push([...cache])
+        }
+
+        for (let i = index; i < arr.length; i++) {
+          const item = arr[i];
+          // 剪枝  前面按照从小到大排序后，取得元素比需要获得元素大时就可以抛弃了（）
+          if (target < item) break;
+
+          // 剔除重复的项
+          /*
+           * i > index 是保证i这一位被执行
+           * index 是当前循环的第一位数组下标 如 a =  [1,2,3] 如果index为1则 a[index] === 2
+           * 如 [1,2,2,2,3,4,5], 如果不加则2位2,3位2会被跳过
+           * i > index 情况出现在已经循环了一遍的情况
+           * 如： 因为 let i = index，所以第一次是不会大于index的，当这一轮循环完，chache.pop()执行后，
+           * i++, i就会大于index了，这时就进行去重判断
+          */
+          if (i > index && arr[i - 1] === item) {
+            debugger;
+            continue
+          };
+
+          cache.push(item)
+          help(result, cache, i + 1, target - item, arr)
+          cache.pop()
+        }
+      }
+
+      help(result, cache, 0, target, arr)
+
+      return result;
+    }
+  </script>
+</body>
+
+</html>

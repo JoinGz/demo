@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    Function.prototype.myCall = function (fn, ...a) {
+      var obj = fn;
+      obj._fn = this;
+      obj._fn(...a)
+      console.log(this)
+      // this.fn = fn;
+      // this.fn()
+    }
+    var foo = {
+      value: 1
+    };
+
+    function bar(a, c, c) {
+      console.log(this.value, '---', 7, 8, 9);
+    }
+
+    bar.myCall(foo); // 1
+
+    console.log('\r\n')
+    console.log('\r\n')
+    console.log('\r\n')
+
+    Function.prototype.myBind = function (fn, ...father) {
+      const _this = this;
+      return function (...son) {
+        fn._fn = _this;
+        return fn._fn(...[...father, ...son])
+      }
+    }
+    var foo = {
+      value: 1
+    };
+
+    function bar(name, age) {
+      console.log(this.value);
+      console.log(name);
+      console.log(age);
+      return 'gz'
+    }
+
+    var bindFoo = bar.bind(foo, 'daisy');
+    console.log(bindFoo('18'))
+
+
+    // bind() 方法创建一个新的函数，在 bind() 被调用时，这个新函数的 this 被指定为 bind() 的第一个参数，而其余参数将作为新函数的参数，供调用时使用。
+
+    /**
+     * 我来实现bind
+     * 解决问题1: 什么时候改变this?
+     * call,apply,bind,或者调用的时候，这个时候假设都没有call,apply。bind我们正在实现肯定不能用，所以选择最后一种方式实现改变this
+     * 
+    */
+
+
+    Function.prototype.myBind2 = function (fn, ...father) {
+      fn = fn || window
+      const _this = this;
+      return function fNNN(...son) {
+        if (this instanceof fNNN) {
+          this.fn = _this;
+          let result = this.fn(...[...father, ...son])
+          delete this.fn
+          return this
+        }
+        fn._fn = _this;
+        let result = fn._fn(...[...father, ...son])
+        delete fn._fn
+        return result
+      }
+    }
+
+    function log2() {
+      console.log(2)
+      this.log = '222'
+    }
+    var y = log2.myBind2()
+    new y()
+
+  </script>
+  <script>
+    function newFn(fn, ...arg) {
+      const obj = {}
+      obj.fn = fn;
+      const result = obj.fn(...arg)
+      // const result = fn.apply(obj, arg)
+      function Puppet() {
+
+      }
+      Puppet.prototype = fn.prototype
+      obj.__proto__ = fn.prototype
+      delete obj.fn;
+      return result || obj
+    }
+    function Otaku(name, age) {
+      this.name = name;
+      this.age = age;
+
+      this.habit = 'Games';
+    }
+
+    var person = newFn(Otaku, 'Kevin', '18')
+
+    console.log(person) // Kevin
+    console.log(person.habit) // Games
+    console.log(person.strength) // 60
+    /**
+     * 1.继承this
+     * 2.继承prototype
+     * 3.返回值处理
+    */
+  </script>
+</body>
+<script>
+  var funcs = [];
+  for (var i = 0; i < 10; i++) {
+    funcs[i] = (function(i){
+      return function () {
+        console.log(i);
+      }
+    }(i))
+  }
+  funcs[1](); // 3
+
+</script>
+
+</html>

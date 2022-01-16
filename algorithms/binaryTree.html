@@ -66,24 +66,100 @@
       }
       search(key, node) {
         node = node || this.root
-        return this.searchLeft(key, node)
+        return this._search(key, node)
       }
-      searchLeft(key, aim) {
+      /*
+        * _search
+        * pnode 是否返回父节点
+      */
+      _search(key, aim, pnode = false, parentNode = this.root) {
         if (aim === null) {
           return false
         }
         if (key === aim.key) {
-          return aim;
+          return pnode ? parentNode : aim;
         }
         if (key > aim.key) {
-          return this.searchLeft(key, aim.right)
+          return this._search(key, aim.right, pnode, aim)
         } else {
-          return this.searchLeft(key, aim.left)
+          return this._search(key, aim.left, pnode, aim)
         }
       }
       remove(key, node) {
         node = node || this.root
-        return this._remove(key, node)
+        // return this._remove(key, node)
+        // return this._remove2(key, node)
+        return this.root = this.remove3(node, key, )
+
+
+      }
+      findPnode(node) {
+
+      }
+      _remove2(key, node) {
+        let pnode = this.root;
+        if (!pnode) {
+          return 'no-tree'
+        }
+
+        if (this.root.left === null && this.root.right === null) {
+          this.root = null;
+          return;
+        }
+
+        const aimNode = this.search(key)
+
+        if (!aimNode) {
+          return 'no-found-node'
+        }
+        pnode = this._search(key, this.root, true)
+
+        if (aimNode.key === pnode.key) {
+          
+        }
+
+        if (!aimNode.left && !aimNode.right) {
+
+          if (pnode.left && pnode.left.key === key) {
+            pnode.left = null
+          }
+
+          if (pnode.right &&  pnode.right.key === key) {
+            pnode.right = null
+          }
+          // aimNode = null
+          return null
+        } else if (aimNode.left && aimNode.right) {
+          const minRight = this.min(aimNode.right)
+
+
+          if (pnode.left && pnode.left.key === key) {
+            pnode.left = minRight
+            minRight.left = aimNode.left
+            
+          }
+          
+          if (pnode.right &&pnode.right.key === key) {
+            pnode.right = minRight
+            minRight.right = aimNode.right
+            
+          }
+          
+
+        } else {
+
+          if (pnode.left &&pnode.left.key === key) {
+            pnode.left = aimNode.left || aimNode.right
+
+          }
+
+          if (pnode.right &&pnode.right.key === key) {
+            pnode.right = aimNode.left || aimNode.right
+
+          }
+          
+        }
+
       }
       _remove(key, node) {
         node = this.search(key, node)
@@ -218,6 +294,36 @@
         }
 
       }
+
+      remove3 (node, key) {
+        if (node == null) {
+          return null
+        }
+
+        if (node.key === key) {
+          if (!node.left && !node.right){
+            return null;
+          } else if (node.left == null) {
+            return node.right
+          } else if (node.right == null) {
+            return node.left
+          } else {
+            const rightMin = this.min(node.right)
+            node.key = rightMin.key
+            node.right = this.remove3(node.right, rightMin.key)
+          }
+        } else if (key < node.key) {
+          node.left = this.remove3(node.left, key)
+          return node
+        } else {
+          node.right = this.remove3(node.right, key)
+          return node
+        }
+
+      }
+      removeWithWhile (node, key) {
+        
+      }
     }
     var t = new binarySearchTree()
     t.insert(100)
@@ -226,14 +332,14 @@
       .insert(70)
       .insert(60)
       .insert(75)
-      .insert(200)
-      .insert(250)
-      .insert(150)
-      .insert(300)
-      .insert(350)
-      .insert(400)
-      .insert(85)
-      .insert(95)
+      // .insert(200)
+      // .insert(250)
+      // .insert(150)
+      // .insert(300)
+      // .insert(350)
+      // .insert(400)
+      // .insert(85)
+      // .insert(95)
 
 
   </script>

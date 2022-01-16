@@ -11,7 +11,7 @@
 <body>
 
 </body>
-<script>
+<!-- <script>
   const PENDING = 'pending';
   const FULFILLED = 'fulfilled';
   const REJECTED = 'rejected';
@@ -109,6 +109,62 @@
   })
   .then(d => {
     // console.log(d);
+  })
+</script> -->
+<script>
+  // new Promise(r => {
+  //   console.log(0)
+  //   r(123)
+  // }).then((data) => {
+  //   console.log(2)
+  //   console.log(data)
+  // })
+  // console.log(1)
+</script>
+<script>
+//   class MyPromise {
+//   then(onFulfilled, onRejected) {
+//     // ==== 新增 ====
+//     // 为了链式调用这里直接创建一个 MyPromise，并在后面 return 出去
+//     const promise2 = new MyPromise((resolve, reject) => {
+//       // 这里的内容在执行器中，会立即执行
+//       if (this.status === FULFILLED) {
+//         // 获取成功回调函数的执行结果
+//         const x = onFulfilled(this.value);
+//         // 传入 resolvePromise 集中处理
+//         resolvePromise(x, resolve, reject);
+//       } else if (this.status === REJECTED) {
+//         onRejected(this.reason);
+//       } else if (this.status === PENDING) {
+//         this.onFulfilledCallbacks.push(onFulfilled);
+//         this.onRejectedCallbacks.push(onRejected);
+//       }
+//     }) 
+    
+//     return promise2;
+//   }
+// }
+
+//   function resolvePromise(x, resolve, reject) {
+//     // 判断x是不是 MyPromise 实例对象
+//     if (x instanceof MyPromise) {
+//       // 执行 x，调用 then 方法，目的是将其状态变为 fulfilled 或者 rejected
+//       // x.then(value => resolve(value), reason => reject(reason))
+//       // 简化之后
+//       x.then(resolve, reject)
+//     } else {
+//       // 普通值
+//       resolve(x)
+//     }
+//   }
+  new Promise(r=>{
+    r(1)
+    console.log('xx')
+  }).then(data=>{
+    console.log(data)
+    return new Promise(r=>r(2))
+  }).then(data=>{
+    console.log(data)
   })
 </script>
 
