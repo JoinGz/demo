@@ -2,13 +2,13 @@
 
 ### 依赖的处理
 
-把入口文件传入`@babel/parser`获取到文件的 ast,使用`@babel/traverse`遍历 ast 并在其中注册 ImportDeclaration 回调来获取依赖的文件
+把入口文件传入`@babel/parser`获取到文件的 AST,使用`@babel/traverse`遍历 AST 并在其中注册 ImportDeclaration 回调来获取依赖的文件
 
 ### esm 转 commonjs
 
 使用`babel-core`中的`transformFromAst`方法,传入已经取到的 AST,中间需要安装`babel-preset-env`然后就能得到处理好的 code
 ### 相对依赖的处理
-相对依赖根据其绝对位置来获取id,后根据id来获取起依赖的内容
+相对依赖根据其绝对位置来获取id,后根据id来获取依赖的内容
 
 ### 多次依赖的处理
 
