@@ -8,6 +8,7 @@ import parser from '@babel/parser'
 import traverse from '@babel/traverse'
 import { transformFromAst } from 'babel-core'
 import ejs from 'ejs'
+import webpackconfig from './webpackconfig.js'
 
 const __fileName = url.fileURLToPath(import.meta.url)
 const __dirName = path.resolve(__fileName, '..')
@@ -16,8 +17,16 @@ let id = 0
 function getDepends({ absPath, relPath }) {
   const depends = []
 
-  const indexContent = fs.readFileSync(absPath, { encoding: 'utf-8' })
+  let indexContent = fs.readFileSync(absPath, { encoding: 'utf-8' })
 
+  const rules = webpackconfig.module.rules
+  rules.forEach(rule => {
+    if (rule.test.test(absPath)) {
+      rule.loader.reverse().forEach((loader) => {
+        indexContent = loader(indexContent, rule.options)
+      })
+    }
+  })
   // 拿到ast就有了所有的依赖，然后babel提供了遍历ast的库并提供回调 @babel/traverse
   const ast = parser.parse(indexContent, {
     sourceType: 'module',
