@@ -58,3 +58,19 @@
 
 
 ```
+
+
+### loader的实现
+
+loader的作用: loader把非js的文件，转换成js。
+转换成js后在给babel做AST
+所以实现就是在获取到原始文件后，loader的test正则如果匹配文件的后缀，就把原文件传入loader中。最后loader输出js。
+
+### plugins的实现
+
+基于tapable事件流,在开始的时候传入hook,提供给用户注册事件。然后在打包的各个阶段触发回调。回调时可以传入一些参数来改变整个webpack中的一些变量，从而改变打包结果。
+
+
+## 总结
+
+通过mini-webpack，了解webpack。同时学习其设计思想。如抽离出来的tapable事件流。

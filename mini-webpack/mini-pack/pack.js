@@ -9,10 +9,17 @@ import traverse from '@babel/traverse'
 import { transformFromAst } from 'babel-core'
 import ejs from 'ejs'
 import webpackconfig from './webpackconfig.js'
+import { SyncHook } from "tapable"
 
 const __fileName = url.fileURLToPath(import.meta.url)
 const __dirName = path.resolve(__fileName, '..')
 let id = 0
+const webpackHook = new SyncHook(['arg1'])
+
+// 注册插件
+webpackconfig.plugins.forEach(item => {
+  item.apply(webpackHook)
+})
 
 function getDepends({ absPath, relPath }) {
   const depends = []
@@ -126,7 +133,16 @@ const template = fs.readFileSync('./require.ejs', { encoding: 'utf-8' })
 
 const code = ejs.render(template, { renderIdMap })
 
-fs.writeFileSync('./dist/main.js', code, { encoding: 'utf-8' })
+let outPath = './dist/main.js'
+const context = {
+  changeOutPath (outpath) {
+    outPath = outpath
+  }
+}
+
+webpackHook.call(context)
+
+fs.writeFileSync(outPath, code, { encoding: 'utf-8' })
 
 function toFunction(codeStr) {
   return codeStr
