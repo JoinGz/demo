@@ -1,4 +1,6 @@
-function JSONloader(source) {
+import {ChangeOutPath} from './changeoutpath.js'
+
+function JSONloader (source) {
   return `export default ${JSON.stringify(source)}`
 }
 
@@ -14,4 +16,7 @@ export default {
       },
     ],
   },
+  plugins: [
+    new ChangeOutPath()
+  ]
 }
