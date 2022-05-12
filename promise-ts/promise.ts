@@ -1,4 +1,5 @@
-enum  STATUS_MEUN  {
+
+enum STATUS_MEUN  {
   PENDING =  "PENDING",
   FAIL =  "FAIL",
   SUCCESS =  "SUCCESS"
@@ -8,9 +9,11 @@ type resolve<T> = (data: T) => void
 type reject<T> = (data: T) => void
 type fn<T, P = any> = (resolve: resolve<T>, reject: reject<P>)=>void
 
+
 let id = 0
 
-class myP<T> {
+
+export class myP<T> {
   id: number = id
   private status:STATUS_MEUN = STATUS_MEUN.PENDING
   private _value!: T
@@ -26,10 +29,12 @@ class myP<T> {
       this.reject(e)
     }
   }
-  then<Y>(fn: (data: T) => Y | T , errFn?: (e: any)=> any): myP<Y> {
+  // then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2>;
+
+  then<Y>(fn: (data: T) => Y , errFn?: (e: any)=> any): myP<Y> {
     console.log('status:' + this.status);
     
-    fn = typeof fn === 'function' ? fn : (value) => value
+    fn = typeof fn === 'function' ? fn : (value: T | Y) => value as Y
     errFn = typeof errFn === 'function' ? errFn : (value) => {throw value}
     
      const p2 =  new myP<Y>((r2, j2) => {
@@ -126,19 +131,33 @@ class myP<T> {
 
 }
 
+// Promise.resolve().then((str) => {
+//   console.log(str)
+//   return '11'
+// }).then((data) => {
+//   return 66
+// }).then((data) => {
+//   return '66'
+// }).then((data) => {
+//   return '66'
+// })
+
 new myP<string>((R, J) => {
-  // setTimeout(() => {
+  setTimeout(() => {
     R('123')
-  // }, 1000);
+  }, 1000);
 })
   .then((data) => {
     console.log(data)
-    return new myP((r, j) => {
-      j('666')
-    })
+    return 666
+    // return new myP((r, j) => {
+    //   j('666')
+    // })
+
   })
   .then((data) => {
     console.log(data)
+    return '11'
   }, e => {
     console.log('xixi->', e)
     })
@@ -149,7 +168,7 @@ new myP<string>((R, J) => {
 })
 
 
-myP.reject('xixi').then(e=>console.log(e)).catch(e=>console.log(`catch:${e}`))
+myP.reject('xixida').then(e=>console.log(e)).catch(e=>console.log(`catch:${e}`))
 
 // myP.resolve().then(() => {
 //   console.log(0); // 1
@@ -179,7 +198,7 @@ myP.reject('xixi').then(e=>console.log(e)).catch(e=>console.log(`catch:${e}`))
 // })
 
 console.log('begin--');
-function promiseResolve<T, P>(p2: myP<T>, value: any, r2: resolve<P>, j2: reject<any>) {
+function promiseResolve<T, P>(p2: myP<T>, value: T | PromiseLike<T> , r2: resolve<T>, j2: reject<any>) {
   if (p2 === value) {
     return j2(new TypeError('The promise and the return value are the same'))
   }
@@ -191,7 +210,7 @@ function promiseResolve<T, P>(p2: myP<T>, value: any, r2: resolve<P>, j2: reject
 
     let then
     try {
-      then = value.then
+      then = (value as PromiseLike<T>).then
     } catch (error) {
       return j2(error)
     }
@@ -202,11 +221,11 @@ function promiseResolve<T, P>(p2: myP<T>, value: any, r2: resolve<P>, j2: reject
       let isRuned: boolean = false
       try {
         
-        then.call(value, (y: any) => {
+        then.call(value, (y) => {
           if (isRuned) return
           isRuned = true
           return promiseResolve(p2, y, r2, j2)
-        }, (r: any) => {
+        }, (r) => {
           if (isRuned) return
           isRuned = true
           return j2(r)
