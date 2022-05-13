@@ -1,24 +1,29 @@
-
-enum STATUS_MEUN  {
-  PENDING =  "PENDING",
-  FAIL =  "FAIL",
-  SUCCESS =  "SUCCESS"
+enum STATUS_MEUN {
+  PENDING = 'PENDING',
+  FAIL = 'FAIL',
+  SUCCESS = 'SUCCESS',
 }
 
-type resolve<T> = (data: T) => void
+type resolve<T> = (data: T | plike<T>) => void
 type reject<T> = (data: T) => void
-type fn<T, P = any> = (resolve: resolve<T>, reject: reject<P>)=>void
+type fn<T, P = any> = (resolve: resolve<T>, reject: reject<P>) => void
 
+interface plike<T> {
+  // p = nerver ? 当P不存的时候给一个never?
+  then<Y = T, P = never>(
+    successFn?: (data: T) => Y | plike<Y>,
+    failFn?: (errData: any) => P | plike<P>
+  ): plike<Y | P>
+}
 
 let id = 0
 
-
-export class myP<T> {
+class myP<T> {
   id: number = id
-  private status:STATUS_MEUN = STATUS_MEUN.PENDING
+  private status: STATUS_MEUN = STATUS_MEUN.PENDING
   private _value!: T
   private _errValue!: any
-  private _fnArr: ((data: T)=>void)[] = []
+  private _fnArr: ((data: T) => void)[] = []
   private _catchFnArr: ((data: T) => void)[] = []
 
   constructor(fn: fn<T>) {
@@ -29,20 +34,26 @@ export class myP<T> {
       this.reject(e)
     }
   }
-  // then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2>;
 
-  then<Y>(fn: (data: T) => Y , errFn?: (e: any)=> any): myP<Y> {
-    console.log('status:' + this.status);
-    
+  then<Y = T, P = never>(
+    fn?: (data: T) => Y,
+    errFn?: (e: any) => P | plike<P>
+  ): myP<Y | P> {
+    console.log('status:' + this.status)
+
     fn = typeof fn === 'function' ? fn : (value: T | Y) => value as Y
-    errFn = typeof errFn === 'function' ? errFn : (value) => {throw value}
-    
-     const p2 =  new myP<Y>((r2, j2) => {
-      
+    errFn =
+      typeof errFn === 'function'
+        ? errFn
+        : (value) => {
+            throw value
+          }
+
+    const p2 = new myP<Y | P>((r2, j2) => {
       if (this.status === STATUS_MEUN.SUCCESS) {
         queueMicrotask(() => {
           try {
-            const value = fn(this._value)
+            const value = fn!(this._value)
             return promiseResolve(p2, value, r2, j2)
           } catch (e) {
             j2(e)
@@ -62,7 +73,7 @@ export class myP<T> {
       if (this.status === STATUS_MEUN.PENDING) {
         this._fnArr.push(() => {
           try {
-            const value = fn(this._value)
+            const value = fn!(this._value)
             return promiseResolve(p2, value, r2, j2)
           } catch (e) {
             j2(e)
@@ -77,19 +88,19 @@ export class myP<T> {
           }
         })
       }
-     })
-    
-     return p2
+    })
+
+    return p2
   }
 
-  catch(fn: (data: any) => void) {
+  catch<B>(fn: (data: any) => B | plike<B>): myP<T | B> {
     // 只需要进行错误处理,注册错误处理
-    return this.then(null!, fn);
+    return this.then(null!, fn)
   }
 
-  private resolve(data: T) {
+  private resolve(data: T | plike<T>) {
     if (this.status === STATUS_MEUN.PENDING) {
-      this._value = data
+      this._value = data as T
       this.status = STATUS_MEUN.SUCCESS
       /**
        * 这里不要要异步，就两种情况
@@ -98,9 +109,9 @@ export class myP<T> {
        * 2.注册后，注册后所有事件都有了，直接执行即可。
        */
       // queueMicrotask(() => {
-        this._fnArr.forEach(fn => {
-          fn(this._value)
-        });
+      this._fnArr.forEach((fn) => {
+        fn(this._value)
+      })
       // })
     }
   }
@@ -111,9 +122,9 @@ export class myP<T> {
       this.status = STATUS_MEUN.FAIL
       // 注释原因： 参看 resolve
       // queueMicrotask(() => {
-        this._catchFnArr.forEach(fn => {
-          fn(this._errValue)
-        });
+      this._catchFnArr.forEach((fn) => {
+        fn(this._errValue)
+      })
       // })
     }
   }
@@ -121,14 +132,12 @@ export class myP<T> {
   static resolve(): myP<unknown>
   static resolve<T>(data: T): myP<T>
   static resolve(data?: any) {
-    return new myP((r)=>r(data))
+    return new myP((r) => r(data))
   }
 
   static reject(data: any) {
-    return new myP((r, j)=> j(data))
+    return new myP((r, j) => j(data))
   }
-
-
 }
 
 // Promise.resolve().then((str) => {
@@ -145,7 +154,7 @@ export class myP<T> {
 new myP<string>((R, J) => {
   setTimeout(() => {
     R('123')
-  }, 1000);
+  }, 1000)
 })
   .then((data) => {
     console.log(data)
@@ -153,22 +162,28 @@ new myP<string>((R, J) => {
     // return new myP((r, j) => {
     //   j('666')
     // })
-
   })
-  .then((data) => {
-    console.log(data)
-    return '11'
-  }, e => {
-    console.log('xixi->', e)
-    })
-  .catch(e => {
-  console.log(`catch->${e}`)
-  }).then((d) => {
-  console.log('last->then', d)
-})
+  .then(
+    (data) => {
+      console.log(data)
+      return '11'
+    },
+    (e) => {
+      console.log('xixi->', e)
+    }
+  )
+  .catch((e) => {
+    console.log(`catch->${e}`)
+  })
+  .then()
+  .then((d) => {
+    console.log('last->then', d)
+  })
 
-
-myP.reject('xixida').then(e=>console.log(e)).catch(e=>console.log(`catch:${e}`))
+myP
+  .reject('xixida')
+  .then((e) => console.log(e))
+  .catch((e) => console.log(`catch:${e}`))
 
 // myP.resolve().then(() => {
 //   console.log(0); // 1
@@ -194,11 +209,16 @@ myP.reject('xixida').then(e=>console.log(e)).catch(e=>console.log(`catch:${e}`))
 // }).then((data) => {
 //   console.log(data)
 // }).catch(e => {
-  
+
 // })
 
-console.log('begin--');
-function promiseResolve<T, P>(p2: myP<T>, value: T | PromiseLike<T> , r2: resolve<T>, j2: reject<any>) {
+console.log('begin--')
+function promiseResolve<T>(
+  p2: myP<T>,
+  value: T | plike<T>,
+  r2: resolve<T>,
+  j2: reject<any>
+) {
   if (p2 === value) {
     return j2(new TypeError('The promise and the return value are the same'))
   }
@@ -210,26 +230,27 @@ function promiseResolve<T, P>(p2: myP<T>, value: T | PromiseLike<T> , r2: resolv
 
     let then
     try {
-      then = (value as PromiseLike<T>).then
+      then = (value as plike<T>).then
     } catch (error) {
       return j2(error)
     }
 
-
     if (typeof then === 'function') {
-
       let isRuned: boolean = false
       try {
-        
-        then.call(value, (y) => {
-          if (isRuned) return
-          isRuned = true
-          return promiseResolve(p2, y, r2, j2)
-        }, (r) => {
-          if (isRuned) return
-          isRuned = true
-          return j2(r)
-        })
+        then.call(
+          value,
+          (y) => {
+            if (isRuned) return
+            isRuned = true
+            return promiseResolve(p2, y, r2, j2)
+          },
+          (r) => {
+            if (isRuned) return
+            isRuned = true
+            return j2(r)
+          }
+        )
       } catch (e) {
         if (isRuned) return
         j2(e)
@@ -237,15 +258,7 @@ function promiseResolve<T, P>(p2: myP<T>, value: T | PromiseLike<T> , r2: resolv
     } else {
       r2(value)
     }
-
-
-
-
-
   } else {
     r2(value)
   }
-
-
 }
-
