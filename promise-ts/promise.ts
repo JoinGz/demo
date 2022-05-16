@@ -36,11 +36,9 @@ class myP<T> {
   }
 
   then<Y = T, P = never>(
-    fn?: (data: T) => Y,
+    fn?: (data: T) => Y | plike<Y>,
     errFn?: (e: any) => P | plike<P>
   ): myP<Y | P> {
-    console.log('status:' + this.status)
-
     fn = typeof fn === 'function' ? fn : (value: T | Y) => value as Y
     errFn =
       typeof errFn === 'function'
@@ -138,6 +136,57 @@ class myP<T> {
   static reject(data: any) {
     return new myP((r, j) => j(data))
   }
+
+  // static all<T>(plist: myP<T>[]): myP<T>
+  static all<T1, R1>(plist: [T1 | plike<T1>, R1 | plike<R1>]): myP<[T1, R1]>
+  static all<T1, R1, Y>(
+    plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>]
+  ): myP<[T1, R1, Y]>
+  static all<T1, R1, Y, P>(
+    plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>]
+  ): myP<[T1, R1, Y, P]>
+  static all<T>(plist: (T | plike<T>)[]): myP<T[]>
+  // TODO: 把 any 改变成 myP<T[]> 会报错  - - !
+  static all<T>(plist: (T | plike<T>)[]): any {
+    let length = plist.length
+    let resultList: T[] = []
+    let nowRunNum = 0
+    return new myP((r, j) => {
+      for (let i = 0; i < length; i++) {
+        const promiseInstance = plist[i]
+
+        if (isMyp(promiseInstance)) {
+          promiseInstance.then(
+            (data) => {
+              resultList.push(data)
+              nowRunNum++
+              if (nowRunNum === length) {
+                r(resultList)
+              }
+            },
+            (e) => {
+              j(e)
+            }
+          )
+        } else {
+          resultList.push(promiseInstance as T)
+          nowRunNum++
+          if (nowRunNum === length) {
+            r(resultList)
+          }
+        }
+      }
+    })
+  }
+}
+
+// 有一个泛型，不知道如何继续正确的泛型
+// function isMyp<T = any>(data: myP<T>): data is myP<T>
+function isMyp(data: any): data is myP<any> {
+  if (data && data.then && typeof data.then === 'function') {
+    return true
+  }
+  return false
 }
 
 // Promise.resolve().then((str) => {
@@ -262,3 +311,31 @@ function promiseResolve<T>(
     r2(value)
   }
 }
+
+//  promise-all  test
+
+myP
+  .all([
+    myP.resolve('1'),
+    myP.resolve(2),
+    myP.reject('fail'),
+    myP.resolve('3'),
+    myP.reject('fail2'),
+  ])
+  .then((data) => {
+    console.log('promiseAll:', data)
+    let str = data[0]
+  })
+  .catch((e) => {
+    console.log('promise->catch:', e)
+  })
+
+
+function a<T, P>(data: [T, P]): [T, P]
+function a<T, P, v>(data: [T, P, v]): [T, P, v]
+function a<T>(data: T[]): [T]
+function a<T>(data: T[]): T[] {
+  return [...data]
+}
+  
+let abc = a(['1', 1, {a: 1}])
