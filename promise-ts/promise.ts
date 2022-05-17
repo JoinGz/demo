@@ -129,11 +129,14 @@ class myP<T> {
 
   static resolve(): myP<unknown>
   static resolve<T>(data: T): myP<T>
-  static resolve(data?: any) {
-    return new myP((r) => r(data))
+  static resolve<T>(data?: T): myP<T>  {
+    if (data instanceof myP) {
+      return data
+    }
+    return new myP((r) => r(data!))
   }
 
-  static reject(data: any) {
+  static reject(data: any): myP<never> {
     return new myP((r, j) => j(data))
   }
 
@@ -145,6 +148,9 @@ class myP<T> {
   static all<T1, R1, Y, P>(
     plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>]
   ): myP<[T1, R1, Y, P]>
+  static all<T1, R1, Y, P, Z>(
+    plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>, Z | plike<Z>]
+  ): myP<[T1, R1, Y, P, Z]>
   static all<T>(plist: (T | plike<T>)[]): myP<T[]>
   // TODO: 把 any 改变成 myP<T[]> 会报错  - - !
   static all<T>(plist: (T | plike<T>)[]): any {
@@ -178,7 +184,51 @@ class myP<T> {
       }
     })
   }
+
+  // T 在数组中（T[]）表示任意类型，T extends myP<infer U> ? U : T 如果是myP则取出返回值，放入联合类型
+  static race<T>(list: Iterable<T>): myP<T extends myP<infer U> ? U : T> {
+    return new myP((r, J) => {
+      // 获取迭代器对象
+      let iter = list[Symbol.iterator]()
+      let result = iter.next()
+
+      while (!result.done) {
+        
+        if (result.value instanceof myP) {
+            result.value.then(r, J)
+            // result.value.then((data: T) => {
+            //   r(data)
+            // }, (e) => {
+            //   J(e)
+            // })
+          } else {
+            r(result.value as T extends myP<infer U> ? U : T)
+          }
+          result = iter.next()
+      }
+
+    })
+  }
+
+  public finally(fn?: ()=> void): myP<T> {
+    return this.then((value => {
+      // 如果 onfinally 返回的是一个 thenable 也会等返回的 thenable 状态改变才会进行后续的 Promise
+      return myP.resolve(
+        typeof fn === 'function' ? fn() : fn
+      ).then(()=>value)
+    }), (value => {
+      return myP.reject(
+        typeof fn === 'function' ? fn() : fn
+      ).catch(()=>{throw value})
+    }))
+  }
 }
+
+
+myP.race([myP.resolve('1'), 2, 3, {a: '123'}]).then(data => {
+  console.log('race' , data)
+})
+
 
 // 有一个泛型，不知道如何继续正确的泛型
 // function isMyp<T = any>(data: myP<T>): data is myP<T>
@@ -261,6 +311,8 @@ myP
 
 // })
 
+
+
 console.log('begin--')
 function promiseResolve<T>(
   p2: myP<T>,
@@ -329,13 +381,30 @@ myP
   .catch((e) => {
     console.log('promise->catch:', e)
   })
+  
+
+  
+new myP((resolve) => {
+  	resolve('')
+}).then(() => {
+  console.log('finally - success')
+  throw new Error("");
+})
+.catch(() => {
+  console.log('finally - error')
+})
+.finally(() => {
+  console.log('finally - finally')
+})
+
+
 
 
 function a<T, P>(data: [T, P]): [T, P]
 function a<T, P, v>(data: [T, P, v]): [T, P, v]
 function a<T>(data: T[]): [T]
-function a<T>(data: T[]): T[] {
+function a<T>(data: T[]): T[] { // T 可以是任意类型，不是保持唯一的T
   return [...data]
 }
   
-let abc = a(['1', 1, {a: 1}])
+let abc = a(['1', 1, { a: 1 }])
