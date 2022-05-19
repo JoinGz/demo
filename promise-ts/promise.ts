@@ -140,20 +140,24 @@ class myP<T> {
     return new myP((r, j) => j(data))
   }
 
-  // static all<T>(plist: myP<T>[]): myP<T>
-  static all<T1, R1>(plist: [T1 | plike<T1>, R1 | plike<R1>]): myP<[T1, R1]>
-  static all<T1, R1, Y>(
-    plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>]
-  ): myP<[T1, R1, Y]>
-  static all<T1, R1, Y, P>(
-    plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>]
-  ): myP<[T1, R1, Y, P]>
-  static all<T1, R1, Y, P, Z>(
-    plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>, Z | plike<Z>]
-  ): myP<[T1, R1, Y, P, Z]>
-  static all<T>(plist: (T | plike<T>)[]): myP<T[]>
-  // TODO: 把 any 改变成 myP<T[]> 会报错  - - !
-  static all<T>(plist: (T | plike<T>)[]): any {
+  // 为什么要必须增加一个 | [unknown] 才能停止数组的扩宽
+  // 猜测是因为重载也把一个的情况包含进来，相当于所有的情况都走这种重载
+  static all<T extends unknown[] | [unknown]>(plist: T): myP<{
+     [P in keyof T] : T[P] extends plike<infer V> ? V : T[P]
+  }>
+  // static all<T1, R1>(plist: [T1 | plike<T1>, R1 | plike<R1>]): myP<[T1, R1]>
+  // static all<T1, R1, Y>(
+  //   plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>]
+  // ): myP<[T1, R1, Y]>
+  // static all<T1, R1, Y, P>(
+  //   plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>]
+  // ): myP<[T1, R1, Y, P]>
+  // static all<T1, R1, Y, P, Z>(
+  //   plist: [T1 | plike<T1>, R1 | plike<R1>, Y | plike<Y>, P | plike<P>, Z | plike<Z>]
+  // ): myP<[T1, R1, Y, P, Z]>
+  // static all<T>(plist: (T | plike<T>)[]): myP<T[]>
+  // TODO: 把 any 改变成 myP<T[]> 会报错  - - ! (重载函数的返回值有冲突，想不报错需要使用联合类型，这里在上面的重载函数后面增加 myP<T[]>)
+  static all<T>(plist: (T | plike<T>)[]): myP<T[]> {
     let length = plist.length
     let resultList: T[] = []
     let nowRunNum = 0
@@ -222,16 +226,166 @@ class myP<T> {
       ).catch(()=>{throw value})
     }))
   }
+
+  /**
+   * readonly 也没有解决值对应问题（扩宽问题）  通过循环数组解决
+   * keyof 各种东西看是什么 
+   * readonly 与数组的关系
+   * 如何保证返回的数据和传入的数组一致  记录原数组的index，更新到新数组上
+   * @param list 
+   */
+  // static allSettled<T extends unknown[]>(list: T): myP<allSettledObj<T>[]>
+  static allSettled<T extends  readonly unknown[] |  readonly [unknown]>(list: T): myP<{
+    [P in keyof T]: allSettledObj<T[P] extends plike<infer V> ? V : T[P]>
+  }>
+  static allSettled<T>(list: Iterable<T>): myP<allSettledObj<T extends plike<infer V> ? V : T>[]> {
+    const resultList: allSettledObj<T extends plike<infer V> ? V : T>[] = []
+
+    return new myP((r) => {
+      const iter = list[Symbol.iterator]()
+      let result = iter.next()
+      let arrayLength = 0
+
+      for (let i = 0; !result.done; i++) {
+        const value = result.value
+        
+        if (isMyp(value)) {
+          value.then((data) => {
+            arrayLength++
+            resultList[i] = {
+              status: 'SUCCESS',
+              value: data
+            }
+            if (arrayLength === resultList.length) {
+              r(resultList)
+            }
+          }, (e) => {
+            
+            arrayLength++
+            
+            resultList[i] = {
+              status: 'FAIL',
+              reason: e
+            }
+            if (arrayLength === resultList.length) {
+              r(resultList)
+            }
+          })
+        } else {
+          arrayLength++
+          resultList[i] = {
+            status: 'SUCCESS',
+            value: value as (T extends plike<infer V> ? V : T)
+          }
+          if (arrayLength === resultList.length) {
+            r(resultList)
+          }
+        }
+        result = iter.next()
+      }
+
+      
+    })
+
+  }
+
+  static any<T>(list: Iterable<T>): myP<T> {
+    
+    const resultList: allSettledObj<T>[] = []
+
+    return new myP((r, j) => {
+      const iter = list[Symbol.iterator]()
+      let result = iter.next()
+      let arrayLength = 0
+
+      for (let i = 0; !result.done; i++) {
+        const value = result.value
+        
+        if (isMyp(value)) {
+          arrayLength++
+          value.then((data) => {
+            r(data)
+          }, (e) => {
+            arrayLength++
+            resultList[i] = {
+              status: 'FAIL',
+              reason: e
+            }
+            if (arrayLength === resultList.length) {
+              j(resultList)
+            }
+          })
+        } else {
+          arrayLength++
+          r(value)
+        }
+        result = iter.next()
+      }
+    })
+
+  }
 }
 
+// 获取到枚举的所有key的联合类型 keyof typeof STATUS_MEUN
+type allSettledObj<T> = {status:keyof typeof STATUS_MEUN, value?: T, reason?: any}
 
 myP.race([myP.resolve('1'), 2, 3, {a: '123'}]).then(data => {
   console.log('race' , data)
 })
 
 
-// 有一个泛型，不知道如何继续正确的泛型
-// function isMyp<T = any>(data: myP<T>): data is myP<T>
+const promise1 = new Promise((resolve) => {
+  resolve(1)
+})
+
+const promise2 = new Promise<number>((resolve) => {
+  resolve(2)
+})
+const promise3 = new Promise((resolve, reject) => {
+  reject(3)
+})
+
+Promise.allSettled([promise1, promise2, promise3, 'string', 6]).then((data) =>
+  console.log(data)
+)
+myP.allSettled([ promise1, promise2, promise3,'string',6]).then((data) =>
+  console.log(data)
+)
+
+console.log('test');
+
+
+const pErr = new Promise((resolve, reject) => {
+  reject("总是失败");
+});
+
+const pSlow = new Promise<string>((resolve, reject) => {
+  setTimeout(resolve, 500, "最终完成");
+  // reject("总是失败3");
+
+});
+
+const pFast = new Promise<string>((resolve, reject) => {
+  setTimeout(resolve, 100, "很快完成");
+  reject("总是失败2");
+});
+
+myP.any([pErr, pSlow, pFast]).then((value) => {
+  console.log('any', value);
+  // pFast fulfils first
+}).catch(e => {
+  console.log('any-error', e)
+})
+
+
+let checkType = new myP<number>((r) => r(123))
+if (isMyp(checkType)) {
+  checkType.then(data=>console.log(data)
+  )
+}
+
+// 有一个泛型，不知道如何继续正确的泛型。这里应该不需要，因为myP是能有正确的类型的
+// function isMyp<T>(data: myP<T> | unknown): data is myP<T>
 function isMyp(data: any): data is myP<any> {
   if (data && data.then && typeof data.then === 'function') {
     return true
@@ -249,6 +403,8 @@ function isMyp(data: any): data is myP<any> {
 // }).then((data) => {
 //   return '66'
 // })
+
+
 
 new myP<string>((R, J) => {
   setTimeout(() => {
@@ -284,32 +440,32 @@ myP
   .then((e) => console.log(e))
   .catch((e) => console.log(`catch:${e}`))
 
-// myP.resolve().then(() => {
-//   console.log(0); // 1
-//   return myP.resolve(4)
-// }).then((res) => {
-//   console.log(res)
-// })
+myP.resolve().then(() => {
+  console.log(0); // 1
+  return myP.resolve(4)
+}).then((res) => {
+  console.log(res)
+})
 
-// myP.resolve().then(() => {
-//   console.log(1); // 0
-// }).then(() => {
-//   console.log(2); // 2
-// }).then(() => {
-//   console.log(3); // 3
-// }).then(() => {
-//   console.log(5); // 5
-// }).then(() =>{
-//   console.log(6);  // 6
-// })
+myP.resolve().then(() => {
+  console.log(1); // 0
+}).then(() => {
+  console.log(2); // 2
+}).then(() => {
+  console.log(3); // 3
+}).then(() => {
+  console.log(5); // 5
+}).then(() =>{
+  console.log(6);  // 6
+})
 
-// new Promise<number>((R, J) => {
-//   J('123')
-// }).then((data) => {
-//   console.log(data)
-// }).catch(e => {
+new Promise<number>((R, J) => {
+  J('123')
+}).then((data) => {
+  console.log(data)
+}).catch(e => {
 
-// })
+})
 
 
 
