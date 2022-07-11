@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="512" height="512"></canvas>
+  <script>
+    const canvas = document.querySelector('#canvas')
+    const ctx = canvas.getContext('2d')
+
+    // ctx.beginPath()
+    // // ctx.fillStyle="red";
+    // ctx.arc(0.5 * canvas.width, 0.5 * canvas.height,50, 0, 2 * Math.PI)
+    // // ctx.fill();
+    // ctx.stroke()
+
+    // ctx.beginPath()
+    // ctx.lineWidth = 10
+    // ctx.strokeStyle = 'green'
+    // ctx.moveTo(100, 20)
+    // ctx.lineTo(200, 20)
+    // ctx.stroke()
+
+
+    // ctx.beginPath()
+    // ctx.lineWidth = 10
+    // ctx.strokeStyle = '#eee'
+    // ctx.moveTo(100, 100)
+    // ctx.lineTo(200, 100)
+    // ctx.stroke()
+
+    /**
+     * beginPath 开始一条新路径
+     * 执行stroke方法时，会找到最近的beginPath，把他们间的绘制操作重新执行。
+     * 所以如果有多stroke就会执行多次，执行的时候样式会以最后一次的样式为准。
+     * 
+     */
+
+
+    //  draw sun
+
+    ctx.beginPath()
+    ctx.lineWidth = 10
+    ctx.lineCap = 'round'
+    ctx.moveTo(56, 512)
+    ctx.lineTo(156, 400)
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.lineWidth = 10
+    ctx.lineCap = 'round'
+
+    ctx.moveTo(156, 400)
+    ctx.lineTo(256, 512)
+    ctx.stroke()
+
+
+    ctx.beginPath()
+    ctx.lineWidth = 10
+    ctx.lineCap = 'round'
+    ctx.moveTo(156, 512)
+    ctx.lineTo(256, 412)
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.lineWidth = 10
+    ctx.lineCap = 'round'
+
+    ctx.moveTo(256, 412)
+    ctx.lineTo(356, 512)
+    ctx.stroke()
+
+    ctx.save()
+    ctx.translate(0.5*canvas.width,0.5*canvas.height);
+    ctx.beginPath();
+    ctx.arc(0,0,50,0,2*Math.PI);
+    ctx.stroke()
+    ctx.restore()
+
+    const canvasDomRect = canvas.getBoundingClientRect()
+    canvas.addEventListener('click',(e)=>{
+      console.log(e.clientX - canvasDomRect.top)
+      console.log(e.clientY - canvasDomRect.left)
+    })
+
+  </script>
+</body>
+
+</html>
