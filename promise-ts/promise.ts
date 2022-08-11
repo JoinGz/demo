@@ -168,7 +168,7 @@ class myP<T> {
         if (isMyp(promiseInstance)) {
           promiseInstance.then(
             (data) => {
-              resultList.push(data)
+              resultList[i] = data
               nowRunNum++
               if (nowRunNum === length) {
                 r(resultList)
@@ -179,7 +179,7 @@ class myP<T> {
             }
           )
         } else {
-          resultList.push(promiseInstance as T)
+          resultList[i] = promiseInstance as T
           nowRunNum++
           if (nowRunNum === length) {
             r(resultList)
